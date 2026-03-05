@@ -1,0 +1,32 @@
+{
+  "name": "page-actions-js",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Javascript library to publish events to Page Actions",
+  "main": "./dist/main.js",
+  "module": "./dist/main.js",
+  "types": "./dist/main.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/main.js",
+      "types": "./dist/main.d.ts"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "build:watch": "tsc --watch",
+    "build:link": "npm run build && npm link",
+    "test": "vitest run",
+    "test:watch": "vitest watch"
+  },
+  "keywords": [],
+  "devDependencies": {
+    "jsdom": "^28.1.0",
+    "pkg-size": "^2.4.0",
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.18"
+  }
+}
