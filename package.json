@@ -20,7 +20,8 @@
     "build:watch": "tsc --watch",
     "build:link": "npm run build && npm link",
     "test": "vitest run",
-    "test:watch": "vitest watch"
+    "test:watch": "vitest watch",
+    "size": "npx pkg-size ./dist"
   },
   "keywords": [],
   "devDependencies": {
@@ -28,5 +29,8 @@
     "pkg-size": "^2.4.0",
     "typescript": "^5.9.3",
     "vitest": "^4.0.18"
+  },
+  "dependencies": {
+    "ua-parser-js": "^2.0.9"
   }
 }
