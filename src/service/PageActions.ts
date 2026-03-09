@@ -48,16 +48,38 @@ export class PageActions {
   public interaction(type: string, terminal: boolean = false): PageActions {
     if (this.terminatedRecording) return this
     if (!this.collectorUrl) throw new Error(COLLECTOR_MISSING_MESSAGE)
-    if (!type) throw new Error(INTERACTION_NO_TYPE_MESSAGE)
     if (!this.isPageViewRegistered()) throw new Error(NO_PAGEVIEW_MESSAGE)
+    if (!type) throw new Error('PageActions.interaction() ' + REQUIRE_TYPE_MESSAGE)
 
     if (terminal) this.terminatedRecording = true
     const event = this.createEvent(type, terminal)
     this.interactions.push(event)
     
-    if (this._verbose) console.log('Page interaction', event)
+    if (this._verbose) console.log('Registered interaction', event)
     this.publishInteractions()
     return this
+  }
+
+  public firstInteraction(type: string, terminal: boolean = false): PageActions {
+    if (this.terminatedRecording) return this
+    if (!this.collectorUrl) throw new Error(COLLECTOR_MISSING_MESSAGE)
+    if (!this.isPageViewRegistered()) throw new Error(NO_PAGEVIEW_MESSAGE)
+    if (!type) throw new Error('PageActions.firstInteraction() ' + REQUIRE_TYPE_MESSAGE)
+
+    if (terminal) this.terminatedRecording = true
+    if (!this.containsInteraction(type)) {
+      const event = this.createEvent(type, terminal)
+      this.interactions.push(event)
+      if (this._verbose) console.log('Registered first interaction', event)
+      this.publishInteractions()
+    } else {
+      if (this._verbose) console.log(`Interaction of type ${type} already registered`)
+    }
+    return this
+  }
+
+  public containsInteraction(interactionType: string): boolean {
+    return this.interactions.findIndex((it) => it.type === interactionType) >= 0
   }
 
   private createEvent(type: string, terminalEvent: boolean = false) {
@@ -125,9 +147,9 @@ export class PageActions {
       body: JSON.stringify(request),
     } as RequestInit;
     return fetch(`${this.collectorUrl}/pageview/interactions`, options);
-  }
+  } 
 }
 const CONSTRUCTOR_NO_SITEID_MESSAGE = 'PageActions() constructor require non-empty siteId argument. Example: new PageActions("google.com")'
 const COLLECTOR_MISSING_MESSAGE = 'Page Actions collector URL not configured. Call .collector(URL) before sending any event'
-const INTERACTION_NO_TYPE_MESSAGE = 'PageActions.interaction() require non-empty type argument. Example: interaction("click")'
+const REQUIRE_TYPE_MESSAGE = 'requires non-empty type argument'
 const NO_PAGEVIEW_MESSAGE = 'PageActions.pageView() should always be called before recording any interaction'

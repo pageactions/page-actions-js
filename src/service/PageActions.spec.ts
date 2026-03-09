@@ -78,6 +78,7 @@ describe('PageActions service', () => {
       expect(fetch).toHaveBeenCalledTimes(1)
       expect(lastFetchRequestBody()).toMatchObject({
         site: 'site.com',
+        
         interactions: [
           { type: 'pv' }
         ]
@@ -117,32 +118,24 @@ describe('PageActions service', () => {
   })
 
   describe('interaction()', () => {
-    test('should throw error when collector not set', () => {
-      // given
-      const pageActions = new PageActions('site.com')
-
-      // then
-      expect(() => pageActions.interaction('click'))
-        .toThrow(/Page Actions collector URL not configured/);
-    })
 
     test('should throw error when interaction type missing', () => {
       // given
-      const pageActions = new PageActions('site.com').collector(COLLECTOR)
+      const pageActions = new PageActions('site.com').collector(COLLECTOR).pageView()
 
       // then
       // @ts-ignore
       expect(() => pageActions.interaction())
-        .toThrow(/PageActions\.interaction\(\) require non-empty type argument/);
+        .toThrow(/PageActions\.interaction\(\) requires non-empty type argument/);
     })
 
     test('should throw error when interaction type empty', () => {
       // given
-      const pageActions = new PageActions('site.com').collector(COLLECTOR)
+      const pageActions = new PageActions('site.com').collector(COLLECTOR).pageView()
 
       // then
       expect(() => pageActions.interaction(''))
-        .toThrow(/PageActions\.interaction\(\) require non-empty type argument/);
+        .toThrow(/PageActions\.interaction\(\) requires non-empty type argument/);
     })
 
     test('should throw error when interaction() called before pageview()', () => {
@@ -207,6 +200,124 @@ describe('PageActions service', () => {
       expect(pageActions.interactions[0].type).toBe('pv')
       expect(pageActions.interactions[1].type).toBe('submit')
       expect(pageActions.interactions[1].terminal).toBe(true)
+    })
+  })
+
+  describe('firstInteraction()', () => {
+
+    test('should throw error when interaction type missing', () => {
+      // given
+      const pageActions = new PageActions('site.com').collector(COLLECTOR).pageView()
+
+      // then
+      // @ts-ignore
+      expect(() => pageActions.firstInteraction())
+        .toThrow(/PageActions\.firstInteraction\(\) requires non-empty type argument/);
+    })
+
+    test('should throw error when interaction type empty', () => {
+      // given
+      const pageActions = new PageActions('site.com').collector(COLLECTOR).pageView()
+
+      // then
+      expect(() => pageActions.firstInteraction(''))
+        .toThrow(/PageActions\.firstInteraction\(\) requires non-empty type argument/);
+    })
+
+    test('should throw error when interaction() called before pageview()', () => {
+      // given
+      const pageActions = new PageActions('site.com').collector(COLLECTOR)
+
+      // then
+      expect(() => pageActions.firstInteraction('submit'))
+        .toThrow(/PageActions\.pageView\(\) should always be called before recording any interaction/);
+    })
+
+    test('should append an event to interactions', () => {
+      // given
+      const pageActions = new PageActions('site.com')
+        .collector(COLLECTOR)
+        .pageView()
+
+      // when
+      pageActions.firstInteraction('input_enter')
+
+      // then
+      expect(pageActions.interactions).toBeDefined()
+      expect(pageActions.interactions.length).toBe(2)
+      expect(pageActions.interactions[0].type).toBe('pv')
+      expect(pageActions.interactions[1].type).toBe('input_enter')
+      expect(pageActions.interactions[1].terminal).toBe(false)
+    })
+
+    test('should not append and event with same type twice', () => {
+      // given
+      const pageActions = new PageActions('site.com')
+        .collector(COLLECTOR)
+        .pageView()
+
+      // when
+      pageActions.firstInteraction('input_enter')
+      pageActions.firstInteraction('input_enter')
+
+      // then
+      expect(pageActions.interactions.length).toBe(2)
+      expect(pageActions.interactions[0].type).toBe('pv')
+      expect(pageActions.interactions[1].type).toBe('input_enter')
+      expect(pageActions.interactions[1].terminal).toBe(false)
+    })
+
+    test('should append an event of different type', () => {
+      // given
+      const pageActions = new PageActions('site.com')
+        .collector(COLLECTOR)
+        .pageView()
+
+      // when
+      pageActions.firstInteraction('input_enter')
+      pageActions.firstInteraction('input_leave')
+
+      // then
+      expect(pageActions.interactions.length).toBe(3)
+      expect(pageActions.interactions[0].type).toBe('pv')
+      expect(pageActions.interactions[1].type).toBe('input_enter')
+      expect(pageActions.interactions[2].type).toBe('input_leave')
+    })
+
+    test('should not append any event after terminal event', () => {
+      // given
+      const pageActions = new PageActions('site.com')
+        .collector(COLLECTOR)
+        .pageView()
+
+      // when
+      pageActions.firstInteraction('input_enter', true)
+      pageActions.firstInteraction('input_leave')
+
+      // then
+      expect(pageActions.interactions.length).toBe(2)
+      expect(pageActions.interactions[0].type).toBe('pv')
+      expect(pageActions.interactions[1].type).toBe('input_enter')
+    })
+
+    test('should send interaction to the collector', () => {
+      // given
+      const pageActions = new PageActions('site.com')
+        .collector(COLLECTOR)
+        .pageView()
+
+      // when
+      pageActions.firstInteraction('input_enter')
+
+      // then
+      expect(fetch).toHaveBeenCalledTimes(2)
+      expect(lastFetchRequestBody()).toMatchObject({
+        site: 'site.com',
+        interactions: [
+          { type: 'pv' },
+          { type: 'input_enter' }
+        ]
+      })
     })
   })
 
