@@ -78,7 +78,7 @@ describe('PageActions service', () => {
       expect(fetch).toHaveBeenCalledTimes(1)
       expect(lastFetchRequestBody()).toMatchObject({
         site: 'site.com',
-        
+        group: 'default',
         interactions: [
           { type: 'pv' }
         ]
@@ -114,6 +114,45 @@ describe('PageActions service', () => {
       expect(pageActions.browser).toBeDefined()
       expect(pageActions.browser?.type).toBeUndefined()
       expect(pageActions.browser?.bot).toBeFalsy()
+    })
+  })
+
+  describe('groupName()', () => {
+    test('should send event with different group name', () => {
+      // given
+      const pageActions = new PageActions('site.com')
+        .collector(COLLECTOR)
+        .group('other-group')
+
+      // when
+      pageActions.pageView()
+
+      // then
+      expect(fetch).toHaveBeenCalledTimes(1)
+      expect(lastFetchRequestBody()).toMatchObject({
+        group: 'other-group',
+        interactions: [
+          { type: 'pv' }
+        ]
+      })
+    })
+    
+    test('should throw error when trying to change group after page view', () => {
+      // given
+      const pageActions = new PageActions('site.com').collector(COLLECTOR).pageView()
+
+      // then
+      expect(() => pageActions.group('ev'))
+        .toThrow(/Group name cannot be changed after page view action/);
+    })
+
+    test('should throw error when group name is empty', () => {
+      // given
+      const pageActions = new PageActions('site.com').collector(COLLECTOR)
+
+      // then
+      expect(() => pageActions.group(''))
+        .toThrow(/Group name cannot be empty/);
     })
   })
 

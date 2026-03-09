@@ -33,6 +33,13 @@ export class PageActions {
     return this
   }
 
+  public group(value: string): PageActions {
+    if (!value) throw new Error(REQUIRE_GROUP_MESSAGE)
+    if (this.interactions.length > 0) throw new Error(GROUP_AFTER_PAGEVIEW_MESSAGE)
+    this.groupName = value
+    return this
+  }
+
   public pageView(): PageActions {
     if (!this.collectorUrl) throw new Error(COLLECTOR_MISSING_MESSAGE)
     this.determineBrowser()
@@ -153,3 +160,5 @@ const CONSTRUCTOR_NO_SITEID_MESSAGE = 'PageActions() constructor require non-emp
 const COLLECTOR_MISSING_MESSAGE = 'Page Actions collector URL not configured. Call .collector(URL) before sending any event'
 const REQUIRE_TYPE_MESSAGE = 'requires non-empty type argument'
 const NO_PAGEVIEW_MESSAGE = 'PageActions.pageView() should always be called before recording any interaction'
+const GROUP_AFTER_PAGEVIEW_MESSAGE = 'Group name cannot be changed after page view action'
+const REQUIRE_GROUP_MESSAGE = 'Group name cannot be empty'
