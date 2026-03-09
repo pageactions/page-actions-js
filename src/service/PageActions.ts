@@ -1,9 +1,10 @@
 import { Crawlers } from "ua-parser-js/extensions";
-import { PAGE_VIEW, type Browser, type Interaction } from "../type/Interaction.type.js"
+import { PAGE_VIEW, type Browser, type Interaction, type ViewInteractions } from "../type/Interaction.type.js"
 import { UAParser } from 'ua-parser-js';
 
 export class PageActions {
 
+  private _verbose: boolean = false
   private collectorUrl: string | undefined = undefined
 
   public interactions: Interaction[] = []
@@ -11,6 +12,7 @@ export class PageActions {
   private terminatedRecording: boolean = false
   private siteId: string
   private groupName: string = 'default'
+  
   public browser?: Browser
 
   constructor(siteId: string) {
@@ -25,6 +27,11 @@ export class PageActions {
     this.collectorUrl = url
     return this
   }
+  
+  public verbose(value: boolean): PageActions {
+    this._verbose = value
+    return this
+  }
 
   public pageView(): PageActions {
     if (!this.collectorUrl) throw new Error(COLLECTOR_MISSING_MESSAGE)
@@ -33,8 +40,8 @@ export class PageActions {
     this.pageViewId = event.id
     this.interactions.push(event)
     
-    console.log('registered page view', event)
-    console.log('registered page view with browser', this.browser)
+    if (this._verbose) console.log('Page view', event)
+    this.publishInteractions()
     return this
   }
 
@@ -48,7 +55,8 @@ export class PageActions {
     const event = this.createEvent(type, terminal)
     this.interactions.push(event)
     
-    console.log('register page interaction', event)
+    if (this._verbose) console.log('Page interaction', event)
+    this.publishInteractions()
     return this
   }
 
@@ -63,10 +71,8 @@ export class PageActions {
 
   private generateId(): string {
     if (self.crypto) {
-      console.log('Example id', self.crypto.randomUUID())
       return self.crypto.randomUUID()
     } else {
-      console.log('PageActions: Fallback event id')
       return 'ev' + Math.random().toString()
     }
   }
@@ -78,11 +84,47 @@ export class PageActions {
       type: results.browser.type,
       bot: results.browser.type === 'crawler',
     } as Browser
-    console.log('Browser initialized with', this.browser)
   }
 
   private isPageViewRegistered(): boolean {
     return this.interactions.length > 0 && this.interactions[0].type === 'pv'
+  }
+
+  public publishInteractions(): void {
+    this.sendInteraction(this.createViewInteractions())
+  }
+
+  public createViewInteractions(): ViewInteractions {
+    return {
+      site: this.siteId,
+      group: this.groupName,
+      pageViewId: this.pageViewId,
+      interactions: this.interactions,
+      viewStartedAt: new Date(),
+      browser: this.browser,
+      referrer: document.referrer,
+      pageUrl: document.location.href,
+      userAgent: navigator.userAgent,
+    } as ViewInteractions
+  }
+
+  // extract networking to separate file
+  private async sendInteraction(request: ViewInteractions): Promise<void> {
+    if (this._verbose) console.log('Sending interactions to Page Actions', request)
+    await this.sendInteractionRequest(request)
+  }
+
+  async sendInteractionRequest(
+    request: ViewInteractions
+  ): Promise<Response> {
+    const headers = new Headers();
+    headers.append('Content-Type', 'application/json');
+    const options = {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(request),
+    } as RequestInit;
+    return fetch(`${this.collectorUrl}/pageview/interactions`, options);
   }
 }
 const CONSTRUCTOR_NO_SITEID_MESSAGE = 'PageActions() constructor require non-empty siteId argument. Example: new PageActions("google.com")'

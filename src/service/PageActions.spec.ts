@@ -1,7 +1,11 @@
-import { expect, test, describe } from 'vitest'
+import { expect, test, describe, vi, afterEach, beforeEach } from 'vitest'
 import { PageActions } from './PageActions.js';
 
 describe('PageActions service', () => {
+
+  beforeEach(() => {
+    globalThis.fetch = vi.fn()
+  })
 
   test('should throw error when constructor called without argument', () => {
     // @ts-ignore
@@ -23,7 +27,7 @@ describe('PageActions service', () => {
   test('should create class when siteId is provided', () => {
     // when
     const pageActions = new PageActions('site.com')
-    
+
     // then
     expect(pageActions).toBeDefined()
   })
@@ -63,6 +67,23 @@ describe('PageActions service', () => {
       expect(pageActions.interactions[0].terminal).toBe(false)
     })
 
+    test('should send interations to collector after page view', () => {
+      // given
+      const pageActions = new PageActions('site.com').collector(COLLECTOR)
+
+      // when
+      pageActions.pageView()
+
+      // then
+      expect(fetch).toHaveBeenCalledTimes(1)
+      expect(lastFetchRequestBody()).toMatchObject({
+        site: 'site.com',
+        interactions: [
+          { type: 'pv' }
+        ]
+      })
+    })
+
     test('should generate random uuid as id for event and set it as pageViewId', () => {
       // given
       const pageActions = new PageActions('site.com').collector(COLLECTOR)
@@ -78,7 +99,7 @@ describe('PageActions service', () => {
       expect(pageActions.interactions[0].id).toMatch(/^[a-f0-9]{8}\-[a-f0-9]{4}\-[a-f0-9]{4}\-[a-f0-9]{4}\-[a-f0-9]{12}$/)
 
       // and
-      expect(pageActions.pageViewId).toBe(pageActions.interactions[0].id) 
+      expect(pageActions.pageViewId).toBe(pageActions.interactions[0].id)
     })
 
     test('should init browser object based on user agent', () => {
@@ -150,6 +171,26 @@ describe('PageActions service', () => {
       expect(pageActions.interactions[1].terminal).toBe(false)
     })
 
+    test('should send interaction to the collector', () => {
+      // given
+      const pageActions = new PageActions('site.com')
+        .collector(COLLECTOR)
+        .pageView()
+
+      // when
+      pageActions.interaction('submit')
+
+      // then
+      expect(fetch).toHaveBeenCalledTimes(2)
+      expect(lastFetchRequestBody()).toMatchObject({
+        site: 'site.com',
+        interactions: [
+          { type: 'pv' },
+          { type: 'submit' }
+        ]
+      })
+    })
+
     test('should not append any events after terminal event registered', () => {
       // given
       const pageActions = new PageActions('site.com')
@@ -168,6 +209,17 @@ describe('PageActions service', () => {
       expect(pageActions.interactions[1].terminal).toBe(true)
     })
   })
+
+  function lastFetchRequestBody() {
+    const fetchCalls = vi.mocked(fetch).mock.calls.length
+    if (fetchCalls > 0) {
+      const [, options] = vi.mocked(fetch).mock.calls[fetchCalls - 1];
+      if (!options?.body) throw new Error('Last fetch call had no body')
+      return JSON.parse(options!.body as string);
+    } else {
+      throw new Error('No fetch call performed')
+    }
+  }
 })
 
 const COLLECTOR = 'http://localhost/collector'
