@@ -1,8 +1,9 @@
 {
-  "name": "page-actions-js",
+  "name": "@pageactions/page-actions-js",
   "version": "0.1.0",
   "type": "module",
-  "description": "Javascript library to publish events to Page Actions",
+  "description": "Vanilla JavaScript PageActions client library",
+  "author": "Page Actions <contact@page-actions.com>",
   "main": "./dist/main.js",
   "module": "./dist/main.js",
   "types": "./dist/main.d.ts",
@@ -32,5 +33,13 @@
   },
   "dependencies": {
     "ua-parser-js": "^2.0.9"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pageactions/page-actions-js.git"
+  },
+  "bugs": {
+    "url": "https://github.com/pageactions/page-actions-js/issues"
+  },
+  "homepage": "https://github.com/pageactions/page-actions-js#readme"
 }
