@@ -2,34 +2,63 @@ import { Crawlers } from "ua-parser-js/extensions";
 import { PAGE_VIEW, type Browser, type Interaction, type ViewInteractions } from "../type/Interaction.type.js"
 import { UAParser } from 'ua-parser-js';
 
+/** Entry point class to report interactions to the Page Actions */
 export class PageActions {
 
-  private _verbose: boolean = false
   private collectorUrl: string | undefined = undefined
 
   public interactions: Interaction[] = []
   public pageViewId: string | undefined = undefined
   private terminatedRecording: boolean = false
-  private siteId: string
   private groupName: string = 'default'
   
   public browser?: Browser
 
+  private _siteId: string | undefined = undefined
+  private _verbose: boolean = false
+  private _accountId: string | undefined = undefined
+
+  /**
+   * Create a PageActions object.
+   * @param {string} siteId - An identifier for your site configured in Page Actions dashboard
+   */
   constructor(siteId: string) {
     if (!siteId) {
       throw new Error(CONSTRUCTOR_NO_SITEID_MESSAGE)
     }
-    this.siteId = siteId
-    console.log('New instance of PageActions created')
+    this._siteId = siteId
+    if (this._verbose) console.log('PageActions instance created with siteId = ' + siteId)
   }
 
+  /**
+   * Configure url of a Page Actions collector. You can get this value on the Site Management page in Page Actions
+   * @param url 
+   * @returns 
+   */
   public collector(url: string): PageActions {
     this.collectorUrl = url
     return this
   }
   
+  /**
+   * Verbose mode logs extra information which helpful during debugging. It is disabled by default.
+   * @param value A boolean flag indicating verbose mode state
+   * @returns Current PageActions object for chaining method calls
+   */
   public verbose(value: boolean): PageActions {
     this._verbose = value
+    return this
+  }
+
+  /**
+   * Configure your account id for reporting interactions. Must be configured before reporting page view or any interaction.
+   * @param value An UUID representing your account.
+   * @returns Current PageActions object for chaining method calls
+   */
+  public accountId(value: string): PageActions {
+    if (!value) throw new Error(REQUIRE_ACCOUNT_ID_MESSAGE)
+    if (this.interactions.length > 0) throw new Error(ACCOUNT_ID_AFTER_PAGEVIEW_MESSAGE)
+    this._accountId = value
     return this
   }
 
@@ -42,6 +71,7 @@ export class PageActions {
 
   public pageView(): PageActions {
     if (!this.collectorUrl) throw new Error(COLLECTOR_MISSING_MESSAGE)
+    if (!this._accountId) throw new Error(ACCOUNT_ID_MISSING_MESSAGE)
     this.determineBrowser()
     const event = this.createEvent(PAGE_VIEW)
     this.pageViewId = event.id
@@ -125,9 +155,10 @@ export class PageActions {
 
   public createViewInteractions(): ViewInteractions {
     return {
-      site: this.siteId,
+      accountId: this._accountId,
+      site: this._siteId,
       group: this.groupName,
-      pageViewId: this.pageViewId,
+      pageViewId: this.pageViewId as string,
       interactions: this.interactions,
       viewStartedAt: new Date(),
       browser: this.browser,
@@ -158,7 +189,10 @@ export class PageActions {
 }
 const CONSTRUCTOR_NO_SITEID_MESSAGE = 'PageActions() constructor require non-empty siteId argument. Example: new PageActions("google.com")'
 const COLLECTOR_MISSING_MESSAGE = 'Page Actions collector URL not configured. Call .collector(URL) before sending any event'
+const ACCOUNT_ID_MISSING_MESSAGE = 'Page Actions account id not configured. Call .accountId(value) before sending any event'
 const REQUIRE_TYPE_MESSAGE = 'requires non-empty type argument'
 const NO_PAGEVIEW_MESSAGE = 'PageActions.pageView() should always be called before recording any interaction'
 const GROUP_AFTER_PAGEVIEW_MESSAGE = 'Group name cannot be changed after page view action'
+const ACCOUNT_ID_AFTER_PAGEVIEW_MESSAGE = 'Account id cannot be changed after page view action'
 const REQUIRE_GROUP_MESSAGE = 'Group name cannot be empty'
+const REQUIRE_ACCOUNT_ID_MESSAGE = 'Account id cannot be empty'

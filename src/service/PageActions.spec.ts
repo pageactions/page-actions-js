@@ -51,9 +51,20 @@ describe('PageActions service', () => {
         .toThrow(/Page Actions collector URL not configured/);
     })
 
-    test('should append a pv event to interactions', () => {
+    test('should throw error when account id is not set', () => {
       // given
       const pageActions = new PageActions('site.com').collector(COLLECTOR)
+
+      // then
+      expect(() => pageActions.pageView())
+        .toThrow(/Page Actions account id not configured/);
+    })
+
+    test('should append a pv event to interactions', () => {
+      // given
+      const pageActions = new PageActions('site.com')
+        .collector(COLLECTOR)
+        .accountId(ACCOUNT_ID)
 
       // when
       pageActions.pageView()
@@ -69,7 +80,9 @@ describe('PageActions service', () => {
 
     test('should send interations to collector after page view', () => {
       // given
-      const pageActions = new PageActions('site.com').collector(COLLECTOR)
+      const pageActions = new PageActions('site.com')
+        .collector(COLLECTOR)
+        .accountId('acc1')
 
       // when
       pageActions.pageView()
@@ -77,6 +90,7 @@ describe('PageActions service', () => {
       // then
       expect(fetch).toHaveBeenCalledTimes(1)
       expect(lastFetchRequestBody()).toMatchObject({
+        accountId: 'acc1',
         site: 'site.com',
         group: 'default',
         interactions: [
@@ -87,7 +101,9 @@ describe('PageActions service', () => {
 
     test('should generate random uuid as id for event and set it as pageViewId', () => {
       // given
-      const pageActions = new PageActions('site.com').collector(COLLECTOR)
+      const pageActions = new PageActions('site.com')
+        .collector(COLLECTOR)
+        .accountId(ACCOUNT_ID)
 
       // when
       pageActions.pageView()
@@ -105,7 +121,9 @@ describe('PageActions service', () => {
 
     test('should init browser object based on user agent', () => {
       // given
-      const pageActions = new PageActions('site.com').collector(COLLECTOR)
+      const pageActions = new PageActions('site.com')
+        .collector(COLLECTOR)
+        .accountId(ACCOUNT_ID)
 
       // when
       pageActions.pageView()
@@ -122,6 +140,7 @@ describe('PageActions service', () => {
       // given
       const pageActions = new PageActions('site.com')
         .collector(COLLECTOR)
+        .accountId(ACCOUNT_ID)
         .group('other-group')
 
       // when
@@ -139,7 +158,10 @@ describe('PageActions service', () => {
     
     test('should throw error when trying to change group after page view', () => {
       // given
-      const pageActions = new PageActions('site.com').collector(COLLECTOR).pageView()
+      const pageActions = new PageActions('site.com')
+        .collector(COLLECTOR)
+        .accountId(ACCOUNT_ID)
+        .pageView()
 
       // then
       expect(() => pageActions.group('ev'))
@@ -148,7 +170,9 @@ describe('PageActions service', () => {
 
     test('should throw error when group name is empty', () => {
       // given
-      const pageActions = new PageActions('site.com').collector(COLLECTOR)
+      const pageActions = new PageActions('site.com')
+        .collector(COLLECTOR)
+        .accountId(ACCOUNT_ID)
 
       // then
       expect(() => pageActions.group(''))
@@ -156,11 +180,38 @@ describe('PageActions service', () => {
     })
   })
 
+  describe('accountId()', () => {
+    test('should throw error when account id is empty', () => {
+      // given
+      const pageActions = new PageActions('site.com')
+        .collector(COLLECTOR)
+
+      // then
+      expect(() => pageActions.accountId(''))
+        .toThrow(/Account id cannot be empty/);
+    })
+
+    test('should throw error when trying to change account id after page view', () => {
+      // given
+      const pageActions = new PageActions('site.com')
+        .collector(COLLECTOR)
+        .accountId('acc1')
+        .pageView()
+
+      // then
+      expect(() => pageActions.accountId('acc2'))
+        .toThrow(/Account id cannot be changed after page view action/);
+    })
+  })
+
   describe('interaction()', () => {
 
     test('should throw error when interaction type missing', () => {
       // given
-      const pageActions = new PageActions('site.com').collector(COLLECTOR).pageView()
+      const pageActions = new PageActions('site.com')
+        .collector(COLLECTOR)
+        .accountId(ACCOUNT_ID)
+        .pageView()
 
       // then
       // @ts-ignore
@@ -170,7 +221,10 @@ describe('PageActions service', () => {
 
     test('should throw error when interaction type empty', () => {
       // given
-      const pageActions = new PageActions('site.com').collector(COLLECTOR).pageView()
+      const pageActions = new PageActions('site.com')
+        .collector(COLLECTOR)
+        .accountId(ACCOUNT_ID)
+        .pageView()
 
       // then
       expect(() => pageActions.interaction(''))
@@ -179,7 +233,9 @@ describe('PageActions service', () => {
 
     test('should throw error when interaction() called before pageview()', () => {
       // given
-      const pageActions = new PageActions('site.com').collector(COLLECTOR)
+      const pageActions = new PageActions('site.com')
+        .collector(COLLECTOR)
+        .accountId(ACCOUNT_ID)
 
       // then
       expect(() => pageActions.interaction('submit'))
@@ -190,6 +246,7 @@ describe('PageActions service', () => {
       // given
       const pageActions = new PageActions('site.com')
         .collector(COLLECTOR)
+        .accountId(ACCOUNT_ID)
         .pageView()
 
       // when
@@ -207,6 +264,7 @@ describe('PageActions service', () => {
       // given
       const pageActions = new PageActions('site.com')
         .collector(COLLECTOR)
+        .accountId(ACCOUNT_ID)
         .pageView()
 
       // when
@@ -227,6 +285,7 @@ describe('PageActions service', () => {
       // given
       const pageActions = new PageActions('site.com')
         .collector(COLLECTOR)
+        .accountId(ACCOUNT_ID)
         .pageView()
 
       // when
@@ -246,7 +305,10 @@ describe('PageActions service', () => {
 
     test('should throw error when interaction type missing', () => {
       // given
-      const pageActions = new PageActions('site.com').collector(COLLECTOR).pageView()
+      const pageActions = new PageActions('site.com')
+        .collector(COLLECTOR)
+        .accountId(ACCOUNT_ID)
+        .pageView()
 
       // then
       // @ts-ignore
@@ -256,7 +318,10 @@ describe('PageActions service', () => {
 
     test('should throw error when interaction type empty', () => {
       // given
-      const pageActions = new PageActions('site.com').collector(COLLECTOR).pageView()
+      const pageActions = new PageActions('site.com')
+        .collector(COLLECTOR)
+        .accountId(ACCOUNT_ID)
+        .pageView()
 
       // then
       expect(() => pageActions.firstInteraction(''))
@@ -265,7 +330,9 @@ describe('PageActions service', () => {
 
     test('should throw error when interaction() called before pageview()', () => {
       // given
-      const pageActions = new PageActions('site.com').collector(COLLECTOR)
+      const pageActions = new PageActions('site.com')
+        .collector(COLLECTOR)
+        .accountId(ACCOUNT_ID)
 
       // then
       expect(() => pageActions.firstInteraction('submit'))
@@ -276,6 +343,7 @@ describe('PageActions service', () => {
       // given
       const pageActions = new PageActions('site.com')
         .collector(COLLECTOR)
+        .accountId(ACCOUNT_ID)
         .pageView()
 
       // when
@@ -293,6 +361,7 @@ describe('PageActions service', () => {
       // given
       const pageActions = new PageActions('site.com')
         .collector(COLLECTOR)
+        .accountId(ACCOUNT_ID)
         .pageView()
 
       // when
@@ -310,6 +379,7 @@ describe('PageActions service', () => {
       // given
       const pageActions = new PageActions('site.com')
         .collector(COLLECTOR)
+        .accountId(ACCOUNT_ID)
         .pageView()
 
       // when
@@ -327,6 +397,7 @@ describe('PageActions service', () => {
       // given
       const pageActions = new PageActions('site.com')
         .collector(COLLECTOR)
+        .accountId(ACCOUNT_ID)
         .pageView()
 
       // when
@@ -343,6 +414,7 @@ describe('PageActions service', () => {
       // given
       const pageActions = new PageActions('site.com')
         .collector(COLLECTOR)
+        .accountId(ACCOUNT_ID)
         .pageView()
 
       // when
@@ -373,3 +445,4 @@ describe('PageActions service', () => {
 })
 
 const COLLECTOR = 'http://localhost/collector'
+const ACCOUNT_ID = 'acc123'

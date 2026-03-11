@@ -9,10 +9,12 @@ export interface Interaction {
 }
 
 export interface ViewInteractions {
+  accountId?: string;
+  siteId?: string;
+  group: string;
   pageViewId: string;
   viewStartedAt: Date;
   interactions: Interaction[];
-  group: string;
   browser?: Browser;
   referrer?: string;
   pageUrl?: string;
