@@ -5,14 +5,13 @@ import { UAParser } from 'ua-parser-js';
 /** Entry point class to report interactions to the Page Actions */
 export class PageActions {
 
-  private collectorUrl: string | undefined = undefined
-
   public interactions: Interaction[] = []
   public pageViewId: string | undefined = undefined
   private terminatedRecording: boolean = false
   
   public browser?: Browser
 
+  private _collectorUrl: string | undefined = undefined
   private _siteId: string | undefined = undefined
   private _verbose: boolean = false
   private _accountId: string | undefined = undefined
@@ -36,7 +35,7 @@ export class PageActions {
    * @returns 
    */
   public collector(url: string): PageActions {
-    this.collectorUrl = url
+    this._collectorUrl = url
     return this
   }
   
@@ -70,7 +69,7 @@ export class PageActions {
   }
 
   public pageView(): PageActions {
-    if (!this.collectorUrl) throw new Error(COLLECTOR_MISSING_MESSAGE)
+    if (!this._collectorUrl) throw new Error(COLLECTOR_MISSING_MESSAGE)
     if (!this._accountId) throw new Error(ACCOUNT_ID_MISSING_MESSAGE)
     this.determineBrowser()
     const event = this.createEvent(PAGE_VIEW)
@@ -84,7 +83,7 @@ export class PageActions {
 
   public interaction(type: string, terminal: boolean = false): PageActions {
     if (this.terminatedRecording) return this
-    if (!this.collectorUrl) throw new Error(COLLECTOR_MISSING_MESSAGE)
+    if (!this._collectorUrl) throw new Error(COLLECTOR_MISSING_MESSAGE)
     if (!this.isPageViewRegistered()) throw new Error(NO_PAGEVIEW_MESSAGE)
     if (!type) throw new Error('PageActions.interaction() ' + REQUIRE_TYPE_MESSAGE)
 
@@ -99,7 +98,7 @@ export class PageActions {
 
   public firstInteraction(type: string, terminal: boolean = false): PageActions {
     if (this.terminatedRecording) return this
-    if (!this.collectorUrl) throw new Error(COLLECTOR_MISSING_MESSAGE)
+    if (!this._collectorUrl) throw new Error(COLLECTOR_MISSING_MESSAGE)
     if (!this.isPageViewRegistered()) throw new Error(NO_PAGEVIEW_MESSAGE)
     if (!type) throw new Error('PageActions.firstInteraction() ' + REQUIRE_TYPE_MESSAGE)
 
@@ -184,7 +183,7 @@ export class PageActions {
       headers,
       body: JSON.stringify(request),
     } as RequestInit;
-    return fetch(`${this.collectorUrl}/pageview/interactions`, options);
+    return fetch(`${this._collectorUrl}/pageview/interactions`, options);
   } 
 }
 const CONSTRUCTOR_NO_SITEID_MESSAGE = 'PageActions() constructor require non-empty siteId argument. Example: new PageActions("google.com")'
