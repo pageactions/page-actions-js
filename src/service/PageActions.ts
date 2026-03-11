@@ -10,13 +10,13 @@ export class PageActions {
   public interactions: Interaction[] = []
   public pageViewId: string | undefined = undefined
   private terminatedRecording: boolean = false
-  private groupName: string = 'default'
   
   public browser?: Browser
 
   private _siteId: string | undefined = undefined
   private _verbose: boolean = false
   private _accountId: string | undefined = undefined
+  private _groupName: string = 'default'
 
   /**
    * Create a PageActions object.
@@ -65,7 +65,7 @@ export class PageActions {
   public group(value: string): PageActions {
     if (!value) throw new Error(REQUIRE_GROUP_MESSAGE)
     if (this.interactions.length > 0) throw new Error(GROUP_AFTER_PAGEVIEW_MESSAGE)
-    this.groupName = value
+    this._groupName = value
     return this
   }
 
@@ -157,7 +157,7 @@ export class PageActions {
     return {
       accountId: this._accountId,
       site: this._siteId,
-      group: this.groupName,
+      group: this._groupName,
       pageViewId: this.pageViewId as string,
       interactions: this.interactions,
       viewStartedAt: new Date(),
