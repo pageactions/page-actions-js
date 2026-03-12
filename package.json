@@ -4,6 +4,7 @@
   "type": "module",
   "description": "Vanilla JavaScript PageActions client library",
   "author": "Page Actions <contact@page-actions.com>",
+  "license": "GPL-3.0-only",
   "main": "./dist/main.js",
   "module": "./dist/main.js",
   "types": "./dist/main.d.ts",
