@@ -1,13 +1,13 @@
 # page-actions-js
 
-This is a [Node.js](https://nodejs.org/en) library published in NPM repository. It's intended for any JS browser application regardless of used framework.
+This is a [Node.js](https://nodejs.org/en) library that allows publishing events to PageActions analytics dashboard. It's intended for any JS browser application regardless of used framework.
 
 ## Instalation
 
 To start with this library just install it as a project dependency.
 
 ```bash
-npm install @pageactions/pageactions-js
+npm install @pageactions/page-actions-js
 ```
 
 ## How to use
