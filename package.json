@@ -1,6 +1,6 @@
 {
   "name": "@pageactions/page-actions-js",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "type": "module",
   "description": "Vanilla JavaScript PageActions client library",
   "author": "Page Actions <contact@page-actions.com>",
