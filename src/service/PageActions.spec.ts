@@ -4,7 +4,12 @@ import { PageActions } from './PageActions.js';
 describe('PageActions service', () => {
 
   beforeEach(() => {
+    vi.useFakeTimers()
     globalThis.fetch = vi.fn()
+  })
+
+  afterEach(() => {
+    vi.restoreAllMocks()
   })
 
   test('should throw error when constructor called without argument', () => {
@@ -86,6 +91,7 @@ describe('PageActions service', () => {
 
       // when
       pageActions.pageView()
+      vi.runAllTimers()
 
       // then
       expect(fetch).toHaveBeenCalledTimes(1)
@@ -145,6 +151,7 @@ describe('PageActions service', () => {
 
       // when
       pageActions.pageView()
+      vi.runAllTimers()
 
       // then
       expect(fetch).toHaveBeenCalledTimes(1)
@@ -266,9 +273,11 @@ describe('PageActions service', () => {
         .collector(COLLECTOR)
         .accountId(ACCOUNT_ID)
         .pageView()
+      vi.runAllTimers()
 
       // when
       pageActions.interaction('submit')
+      vi.runAllTimers()
 
       // then
       expect(fetch).toHaveBeenCalledTimes(2)
@@ -299,6 +308,57 @@ describe('PageActions service', () => {
       expect(pageActions.interactions[1].type).toBe('submit')
       expect(pageActions.interactions[1].terminal).toBe(true)
     })
+
+    test('should debounce publishing events when next interaction added below 2000 ms delay', () => {
+      // given
+      const pageActions = new PageActions('site.com')
+        .collector(COLLECTOR)
+        .accountId(ACCOUNT_ID)
+        .pageView()
+      vi.runAllTimers()
+
+      // when
+      pageActions.interaction('focus')
+      vi.advanceTimersByTime(1999)
+      pageActions.interaction('click')
+      vi.advanceTimersByTime(2001)
+
+      // then
+      expect(pageActions.interactions.length).toBe(3)
+
+      // and
+      expect(fetch).toHaveBeenCalledTimes(2)
+      expect(lastFetchRequestBody()).toMatchObject({
+        site: 'site.com',
+        interactions: [
+          { type: 'pv' },
+          { type: 'focus' },
+          { type: 'click' }
+        ]
+      })
+    })
+
+    test('should not debounce publishing events when next interaction added after 2000 ms delay', () => {
+      // given
+      const pageActions = new PageActions('site.com')
+        .collector(COLLECTOR)
+        .accountId(ACCOUNT_ID)
+        .pageView()
+      vi.runAllTimers()
+
+      // when
+      pageActions.interaction('focus')
+      vi.advanceTimersByTime(2001)
+      pageActions.interaction('click')
+      vi.advanceTimersByTime(2001)
+
+      // then
+      expect(pageActions.interactions.length).toBe(3)
+
+      // and
+      expect(fetch).toHaveBeenCalledTimes(3)
+    })
+    
   })
 
   describe('firstInteraction()', () => {
@@ -416,9 +476,11 @@ describe('PageActions service', () => {
         .collector(COLLECTOR)
         .accountId(ACCOUNT_ID)
         .pageView()
+      vi.runAllTimers()
 
       // when
       pageActions.firstInteraction('input_enter')
+      vi.runAllTimers()
 
       // then
       expect(fetch).toHaveBeenCalledTimes(2)

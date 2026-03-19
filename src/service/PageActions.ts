@@ -1,6 +1,7 @@
 import { Crawlers } from "ua-parser-js/extensions";
 import { PAGE_VIEW, type Browser, type Interaction, type ViewInteractions } from "../type/Interaction.type.js"
 import { UAParser } from 'ua-parser-js';
+import { debounceTime, Subject } from "rxjs";
 
 /** Entry point class to report interactions to the Page Actions */
 export class PageActions {
@@ -17,6 +18,9 @@ export class PageActions {
   private _accountId: string | undefined = undefined
   private _groupName: string = 'default'
 
+  private _debounceTimeMs = 2000
+  private interactionStream: Subject<Interaction> = new Subject<Interaction>()
+
   /**
    * Create a PageActions object.
    * @param {string} siteId - An identifier for your site configured in Page Actions dashboard
@@ -26,6 +30,7 @@ export class PageActions {
       throw new Error(CONSTRUCTOR_NO_SITEID_MESSAGE)
     }
     this._siteId = siteId
+    this.registerInteractionsListener()
     if (this._verbose) console.log('PageActions instance created with siteId = ' + siteId)
   }
 
@@ -72,12 +77,10 @@ export class PageActions {
     if (!this._collectorUrl) throw new Error(COLLECTOR_MISSING_MESSAGE)
     if (!this._accountId) throw new Error(ACCOUNT_ID_MISSING_MESSAGE)
     this.determineBrowser()
-    const event = this.createEvent(PAGE_VIEW)
-    this.pageViewId = event.id
-    this.interactions.push(event)
-    
-    if (this._verbose) console.log('Page view', event)
-    this.publishInteractions()
+    const interaction = this.createInteraction(PAGE_VIEW)
+    this.pageViewId = interaction.id
+    this.appendInteraction(interaction)
+    if (this._verbose) console.log('Registered page view', interaction)
     return this
   }
 
@@ -88,11 +91,10 @@ export class PageActions {
     if (!type) throw new Error('PageActions.interaction() ' + REQUIRE_TYPE_MESSAGE)
 
     if (terminal) this.terminatedRecording = true
-    const event = this.createEvent(type, terminal)
-    this.interactions.push(event)
+    const interaction = this.createInteraction(type, terminal)
+    this.appendInteraction(interaction)
     
-    if (this._verbose) console.log('Registered interaction', event)
-    this.publishInteractions()
+    if (this._verbose) console.log('Registered interaction', interaction)
     return this
   }
 
@@ -104,10 +106,9 @@ export class PageActions {
 
     if (terminal) this.terminatedRecording = true
     if (!this.containsInteraction(type)) {
-      const event = this.createEvent(type, terminal)
-      this.interactions.push(event)
-      if (this._verbose) console.log('Registered first interaction', event)
-      this.publishInteractions()
+      const interaction = this.createInteraction(type, terminal)
+      this.appendInteraction(interaction)
+      if (this._verbose) console.log('Registered first interaction', interaction)
     } else {
       if (this._verbose) console.log(`Interaction of type ${type} already registered`)
     }
@@ -118,13 +119,18 @@ export class PageActions {
     return this.interactions.findIndex((it) => it.type === interactionType) >= 0
   }
 
-  private createEvent(type: string, terminalEvent: boolean = false) {
+  private createInteraction(type: string, terminalEvent: boolean = false): Interaction {
     return {
       id: this.generateId(),
       type,
       time: new Date(),
       terminal: terminalEvent,
     } as Interaction;
+  }
+
+  private appendInteraction(interaction: Interaction): void {
+    this.interactions.push(interaction)
+    this.interactionStream.next(interaction)
   }
 
   private generateId(): string {
@@ -146,6 +152,16 @@ export class PageActions {
 
   private isPageViewRegistered(): boolean {
     return this.interactions.length > 0 && this.interactions[0].type === 'pv'
+  }
+
+  private registerInteractionsListener(): void {
+    this.interactionStream
+      .pipe(
+        debounceTime(this._debounceTimeMs)
+      )
+      .subscribe(() => {
+        this.publishInteractions()
+      })
   }
 
   public publishInteractions(): void {
@@ -182,11 +198,12 @@ export class PageActions {
       method: 'POST',
       headers,
       body: JSON.stringify(request),
+      priority: 'low',
     } as RequestInit;
     return fetch(`${this._collectorUrl}/pageview/interactions`, options);
   } 
 }
-const CONSTRUCTOR_NO_SITEID_MESSAGE = 'PageActions() constructor require non-empty siteId argument. Example: new PageActions("google.com")'
+const CONSTRUCTOR_NO_SITEID_MESSAGE = 'PageActions() constructor require non-empty siteId argument'
 const COLLECTOR_MISSING_MESSAGE = 'Page Actions collector URL not configured. Call .collector(URL) before sending any event'
 const ACCOUNT_ID_MISSING_MESSAGE = 'Page Actions account id not configured. Call .accountId(value) before sending any event'
 const REQUIRE_TYPE_MESSAGE = 'requires non-empty type argument'

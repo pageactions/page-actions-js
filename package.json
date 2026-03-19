@@ -33,6 +33,7 @@
     "vitest": "^4.0.18"
   },
   "dependencies": {
+    "rxjs": "^7.8.2",
     "ua-parser-js": "^2.0.9"
   },
   "repository": {
