@@ -79,3 +79,9 @@ Example:
 ```ts
 pageActions.flush();
 ```
+
+Another way to do this is by using a `flush` option when reporting an action.
+
+```ts
+pageActions.action("focus", { flush: true });
+```

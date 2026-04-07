@@ -462,8 +462,8 @@ describe("PageActions service", () => {
     });
   });
 
-  describe("flush()", () => {
-    test("should send actions to the collector before debounce timeout", () => {
+  describe("flushing", () => {
+    test("should send actions to the collector before debounce timeout when flush() called", () => {
       // given
       const pageActions = new PageActions("site.com")
         .collector(COLLECTOR)
@@ -475,6 +475,26 @@ describe("PageActions service", () => {
       pageActions.action("focus");
       vi.advanceTimersByTime(100);
       pageActions.flush();
+
+      // then
+      expect(fetch).toHaveBeenCalledTimes(2);
+      expect(lastFetchRequestBody()).toMatchObject({
+        site: "site.com",
+        interactions: [{ type: "pv" }, { type: "focus" }],
+      });
+    });
+
+    test("should send actions to the collector before debounce timeout when flush flag set", () => {
+      // given
+      const pageActions = new PageActions("site.com")
+        .collector(COLLECTOR)
+        .accountId(ACCOUNT_ID)
+        .pageView();
+      vi.runAllTimers();
+
+      // when
+      pageActions.action("focus", { flush: true });
+      vi.advanceTimersByTime(100);
 
       // then
       expect(fetch).toHaveBeenCalledTimes(2);

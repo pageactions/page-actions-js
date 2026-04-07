@@ -8,8 +8,10 @@ import {
 import { UAParser } from "ua-parser-js";
 import { debounceTime, Subject } from "rxjs";
 
+/** Object for optional action's options */
 export interface ActionOptions {
   terminal?: boolean;
+  flush?: boolean;
 }
 
 /** Entry point class to report actions to the Page Actions collector */
@@ -92,6 +94,12 @@ export class PageActions {
     return this;
   }
 
+  /**
+   * Reports an action with given type
+   * @param type An identifier for the action
+   * @param options Optional object with action's options
+   * @returns Current PageActions service
+   */
   public action(type: string, options: ActionOptions = {}): PageActions {
     if (this.terminatedRecording) return this;
     if (!this._collectorUrl) throw new Error(COLLECTOR_MISSING_MESSAGE);
@@ -103,9 +111,16 @@ export class PageActions {
     this.appendInteraction(interaction);
 
     if (this._verbose) console.log("Registered interaction", interaction);
+    if (options?.flush) this.flush();
     return this;
   }
 
+  /**
+   * Reports the first occurence of an action with given type
+   * @param type An identifier for the action
+   * @param options Optional object with action's options
+   * @returns Current PageActions service
+   */
   public firstAction(type: string, options: ActionOptions = {}): PageActions {
     if (this.terminatedRecording) return this;
     if (!this._collectorUrl) throw new Error(COLLECTOR_MISSING_MESSAGE);
@@ -119,6 +134,7 @@ export class PageActions {
     } else {
       if (this._verbose) console.log(`Action of type ${type} already registered`);
     }
+    if (options?.flush) this.flush();
     return this;
   }
 
