@@ -75,9 +75,6 @@ describe("PageActions service", () => {
       expect(pageActions.interactions).toBeDefined();
       expect(pageActions.interactions.length).toBe(1);
       expect(pageActions.interactions[0].type).toBe("pv");
-
-      // and
-      expect(pageActions.interactions[0].terminal).toBe(false);
     });
 
     test("should send interations to collector after page view", () => {
@@ -250,7 +247,6 @@ describe("PageActions service", () => {
       expect(pageActions.interactions.length).toBe(2);
       expect(pageActions.interactions[0].type).toBe("pv");
       expect(pageActions.interactions[1].type).toBe("submit");
-      expect(pageActions.interactions[1].terminal).toBe(false);
     });
 
     test("should send action to the collector", () => {
@@ -281,7 +277,7 @@ describe("PageActions service", () => {
         .pageView();
 
       // when
-      pageActions.action("submit", true);
+      pageActions.action("submit", { terminal: true });
       pageActions.action("submit");
 
       // then
@@ -289,7 +285,6 @@ describe("PageActions service", () => {
       expect(pageActions.interactions.length).toBe(2);
       expect(pageActions.interactions[0].type).toBe("pv");
       expect(pageActions.interactions[1].type).toBe("submit");
-      expect(pageActions.interactions[1].terminal).toBe(true);
     });
 
     test("should debounce publishing events when next action added below 2000 ms delay", () => {
@@ -392,7 +387,6 @@ describe("PageActions service", () => {
       expect(pageActions.interactions.length).toBe(2);
       expect(pageActions.interactions[0].type).toBe("pv");
       expect(pageActions.interactions[1].type).toBe("input_enter");
-      expect(pageActions.interactions[1].terminal).toBe(false);
     });
 
     test("should not append and event with same type twice", () => {
@@ -410,7 +404,6 @@ describe("PageActions service", () => {
       expect(pageActions.interactions.length).toBe(2);
       expect(pageActions.interactions[0].type).toBe("pv");
       expect(pageActions.interactions[1].type).toBe("input_enter");
-      expect(pageActions.interactions[1].terminal).toBe(false);
     });
 
     test("should append an event of different type", () => {
@@ -439,7 +432,7 @@ describe("PageActions service", () => {
         .pageView();
 
       // when
-      pageActions.firstAction("input_enter", true);
+      pageActions.firstAction("input_enter", { terminal: true });
       pageActions.firstAction("input_leave");
 
       // then

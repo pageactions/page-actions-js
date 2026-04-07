@@ -4,7 +4,6 @@ export interface Interaction {
   id: string;
   type: string;
   time: Date;
-  terminal?: boolean;
 }
 
 export interface ViewInteractions {

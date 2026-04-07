@@ -8,6 +8,10 @@ import {
 import { UAParser } from "ua-parser-js";
 import { debounceTime, Subject } from "rxjs";
 
+export interface ActionOptions {
+  terminal?: boolean;
+}
+
 /** Entry point class to report actions to the Page Actions collector */
 export class PageActions {
   public interactions: Interaction[] = [];
@@ -88,28 +92,28 @@ export class PageActions {
     return this;
   }
 
-  public action(type: string, terminal: boolean = false): PageActions {
+  public action(type: string, options: ActionOptions = {}): PageActions {
     if (this.terminatedRecording) return this;
     if (!this._collectorUrl) throw new Error(COLLECTOR_MISSING_MESSAGE);
     if (!this.isPageViewRegistered()) throw new Error(NO_PAGEVIEW_MESSAGE);
     if (!type) throw new Error("PageActions.action() " + REQUIRE_TYPE_MESSAGE);
 
-    if (terminal) this.terminatedRecording = true;
-    const interaction = this.createInteraction(type, terminal);
+    if (options?.terminal) this.terminatedRecording = true;
+    const interaction = this.createInteraction(type);
     this.appendInteraction(interaction);
 
     if (this._verbose) console.log("Registered interaction", interaction);
     return this;
   }
 
-  public firstAction(type: string, terminal: boolean = false): PageActions {
+  public firstAction(type: string, options: ActionOptions = {}): PageActions {
     if (this.terminatedRecording) return this;
     if (!this._collectorUrl) throw new Error(COLLECTOR_MISSING_MESSAGE);
     if (!this.isPageViewRegistered()) throw new Error(NO_PAGEVIEW_MESSAGE);
     if (!type) throw new Error("PageActions.firstAction() " + REQUIRE_TYPE_MESSAGE);
-    if (terminal) this.terminatedRecording = true;
+    if (options?.terminal) this.terminatedRecording = true;
     if (!this.containsInteraction(type)) {
-      const interaction = this.createInteraction(type, terminal);
+      const interaction = this.createInteraction(type);
       this.appendInteraction(interaction);
       if (this._verbose) console.log("Registered first action", interaction);
     } else {
@@ -131,12 +135,11 @@ export class PageActions {
     return this.interactions.findIndex((it) => it.type === interactionType) >= 0;
   }
 
-  private createInteraction(type: string, terminalEvent: boolean = false): Interaction {
+  private createInteraction(type: string): Interaction {
     return {
       id: this.generateId(),
       type,
       time: new Date(),
-      terminal: terminalEvent,
     } as Interaction;
   }
 

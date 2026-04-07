@@ -52,10 +52,12 @@ The most basic way of reporting an action is by calling action() function with a
 pageActions.action("button_click");
 ```
 
-There is also a second form of this function with second parameter signaling that this is a terminal action. After such action no further events are recorded and sent to the collector. For example, it is useful to stop recording when form was submitted.
+#### Terminal action
+
+You can pass a second argument to the function with action's options. The `terminal` option marks an action as the last important action on current page. After such action no further events are recorded and sent to the collector. For example, it is useful to stop recording when form was submitted.
 
 ```ts
-pageActions.action("form_submit", true);
+pageActions.action("form_submit", { terminal: true });
 ```
 
 ### Report action only for the first time
@@ -73,6 +75,7 @@ This action will be reported at most one time. Every further call with the same 
 By default, sending actions to the collector is delayed so analytics doesn't impact page performance. Sometimes you may need to send events immediately. For example, when clicking on the button performs navigation to a different page. In such situations a `flush()` method can be used to publish events before current page is closed.
 
 Example:
+
 ```ts
-pageActions.flush()
+pageActions.flush();
 ```
