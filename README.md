@@ -12,7 +12,7 @@ npm install @pageactions/page-actions-js
 
 ## How to use
 
-Basically by creating `PageActions` object and later calling functions when events occur. First action should always be a page view represented by a `pageView()` function. You should create only one instance of `PageActions` for a given page/view. If you want to send events from different components, then the same `PageActions` object should be used by these components.
+Basically by creating `PageActions` service and later calling functions when events occur. First action should always be a page view represented by a `pageView()` function. You should create only one instance of `PageActions` for a given page/view. If you want to send events from different components, then the same `PageActions` object should be used by these components.
 
 ### Create PageActions service
 
@@ -67,3 +67,12 @@ pageActions.firstAction("firstname_changed");
 ```
 
 This action will be reported at most one time. Every further call with the same action type will be ignored during page visit (same PageActions instance).
+
+### Flushing actions
+
+By default, sending actions to the collector is delayed so analytics doesn't impact page performance. Sometimes you may need to send events immediately. For example, when clicking on the button performs navigation to a different page. In such situations a `flush()` method can be used to publish events before current page is closed.
+
+Example:
+```ts
+pageActions.flush()
+```
