@@ -22,7 +22,7 @@ export class PageActions {
   private interactionStream: Subject<Interaction> = new Subject<Interaction>()
 
   /**
-   * Create a PageActions object.
+   * Create a PageActions service
    * @param {string} siteId - An identifier for your site configured in Page Actions dashboard
    */
   constructor(siteId: string) {
@@ -31,7 +31,7 @@ export class PageActions {
     }
     this._siteId = siteId
     this.registerInteractionsListener()
-    if (this._verbose) console.log('PageActions instance created with siteId = ' + siteId)
+    if (this._verbose) console.log('PageActions service created with siteId = ' + siteId)
   }
 
   /**
@@ -47,7 +47,7 @@ export class PageActions {
   /**
    * Verbose mode logs extra information which helpful during debugging. It is disabled by default.
    * @param value A boolean flag indicating verbose mode state
-   * @returns Current PageActions object for chaining method calls
+   * @returns Current PageActions service for chaining method calls
    */
   public verbose(value: boolean): PageActions {
     this._verbose = value
@@ -57,7 +57,7 @@ export class PageActions {
   /**
    * Configure your account id for reporting interactions. Must be configured before reporting page view or any interaction.
    * @param value An UUID representing your account.
-   * @returns Current PageActions object for chaining method calls
+   * @returns Current PageActions service for chaining method calls
    */
   public accountId(value: string): PageActions {
     if (!value) throw new Error(REQUIRE_ACCOUNT_ID_MESSAGE)
