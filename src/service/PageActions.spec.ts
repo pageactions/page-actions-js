@@ -211,9 +211,9 @@ describe('PageActions service', () => {
     })
   })
 
-  describe('interaction()', () => {
+  describe('action()', () => {
 
-    test('should throw error when interaction type missing', () => {
+    test('should throw error when action type missing', () => {
       // given
       const pageActions = new PageActions('site.com')
         .collector(COLLECTOR)
@@ -222,11 +222,11 @@ describe('PageActions service', () => {
 
       // then
       // @ts-ignore
-      expect(() => pageActions.interaction())
-        .toThrow(/PageActions\.interaction\(\) requires non-empty type argument/);
+      expect(() => pageActions.action())
+        .toThrow(/PageActions\.action\(\) requires non-empty type argument/);
     })
 
-    test('should throw error when interaction type empty', () => {
+    test('should throw error when action type empty', () => {
       // given
       const pageActions = new PageActions('site.com')
         .collector(COLLECTOR)
@@ -234,19 +234,19 @@ describe('PageActions service', () => {
         .pageView()
 
       // then
-      expect(() => pageActions.interaction(''))
-        .toThrow(/PageActions\.interaction\(\) requires non-empty type argument/);
+      expect(() => pageActions.action(''))
+        .toThrow(/PageActions\.action\(\) requires non-empty type argument/);
     })
 
-    test('should throw error when interaction() called before pageview()', () => {
+    test('should throw error when action() called before pageview()', () => {
       // given
       const pageActions = new PageActions('site.com')
         .collector(COLLECTOR)
         .accountId(ACCOUNT_ID)
 
       // then
-      expect(() => pageActions.interaction('submit'))
-        .toThrow(/PageActions\.pageView\(\) should always be called before recording any interaction/);
+      expect(() => pageActions.action('submit'))
+        .toThrow(/PageActions\.pageView\(\) should always be called before recording any action/);
     })
 
     test('should append an event to interactions', () => {
@@ -257,7 +257,7 @@ describe('PageActions service', () => {
         .pageView()
 
       // when
-      pageActions.interaction('submit')
+      pageActions.action('submit')
 
       // then
       expect(pageActions.interactions).toBeDefined()
@@ -267,7 +267,7 @@ describe('PageActions service', () => {
       expect(pageActions.interactions[1].terminal).toBe(false)
     })
 
-    test('should send interaction to the collector', () => {
+    test('should send action to the collector', () => {
       // given
       const pageActions = new PageActions('site.com')
         .collector(COLLECTOR)
@@ -276,7 +276,7 @@ describe('PageActions service', () => {
       vi.runAllTimers()
 
       // when
-      pageActions.interaction('submit')
+      pageActions.action('submit')
       vi.runAllTimers()
 
       // then
@@ -298,8 +298,8 @@ describe('PageActions service', () => {
         .pageView()
 
       // when
-      pageActions.interaction('submit', true)
-      pageActions.interaction('submit')
+      pageActions.action('submit', true)
+      pageActions.action('submit')
 
       // then
       expect(pageActions.interactions).toBeDefined()
@@ -309,7 +309,7 @@ describe('PageActions service', () => {
       expect(pageActions.interactions[1].terminal).toBe(true)
     })
 
-    test('should debounce publishing events when next interaction added below 2000 ms delay', () => {
+    test('should debounce publishing events when next action added below 2000 ms delay', () => {
       // given
       const pageActions = new PageActions('site.com')
         .collector(COLLECTOR)
@@ -318,9 +318,9 @@ describe('PageActions service', () => {
       vi.runAllTimers()
 
       // when
-      pageActions.interaction('focus')
+      pageActions.action('focus')
       vi.advanceTimersByTime(1999)
-      pageActions.interaction('click')
+      pageActions.action('click')
       vi.advanceTimersByTime(2001)
 
       // then
@@ -338,7 +338,7 @@ describe('PageActions service', () => {
       })
     })
 
-    test('should not debounce publishing events when next interaction added after 2000 ms delay', () => {
+    test('should not debounce publishing events when next action added after 2000 ms delay', () => {
       // given
       const pageActions = new PageActions('site.com')
         .collector(COLLECTOR)
@@ -347,9 +347,9 @@ describe('PageActions service', () => {
       vi.runAllTimers()
 
       // when
-      pageActions.interaction('focus')
+      pageActions.action('focus')
       vi.advanceTimersByTime(2001)
-      pageActions.interaction('click')
+      pageActions.action('click')
       vi.advanceTimersByTime(2001)
 
       // then
@@ -361,9 +361,9 @@ describe('PageActions service', () => {
     
   })
 
-  describe('firstInteraction()', () => {
+  describe('firstAction()', () => {
 
-    test('should throw error when interaction type missing', () => {
+    test('should throw error when action type missing', () => {
       // given
       const pageActions = new PageActions('site.com')
         .collector(COLLECTOR)
@@ -372,11 +372,11 @@ describe('PageActions service', () => {
 
       // then
       // @ts-ignore
-      expect(() => pageActions.firstInteraction())
-        .toThrow(/PageActions\.firstInteraction\(\) requires non-empty type argument/);
+      expect(() => pageActions.firstAction())
+        .toThrow(/PageActions\.firstAction\(\) requires non-empty type argument/);
     })
 
-    test('should throw error when interaction type empty', () => {
+    test('should throw error when action type empty', () => {
       // given
       const pageActions = new PageActions('site.com')
         .collector(COLLECTOR)
@@ -384,19 +384,19 @@ describe('PageActions service', () => {
         .pageView()
 
       // then
-      expect(() => pageActions.firstInteraction(''))
-        .toThrow(/PageActions\.firstInteraction\(\) requires non-empty type argument/);
+      expect(() => pageActions.firstAction(''))
+        .toThrow(/PageActions\.firstAction\(\) requires non-empty type argument/);
     })
 
-    test('should throw error when interaction() called before pageview()', () => {
+    test('should throw error when action() called before pageview()', () => {
       // given
       const pageActions = new PageActions('site.com')
         .collector(COLLECTOR)
         .accountId(ACCOUNT_ID)
 
       // then
-      expect(() => pageActions.firstInteraction('submit'))
-        .toThrow(/PageActions\.pageView\(\) should always be called before recording any interaction/);
+      expect(() => pageActions.firstAction('submit'))
+        .toThrow(/PageActions\.pageView\(\) should always be called before recording any action/);
     })
 
     test('should append an event to interactions', () => {
@@ -407,7 +407,7 @@ describe('PageActions service', () => {
         .pageView()
 
       // when
-      pageActions.firstInteraction('input_enter')
+      pageActions.firstAction('input_enter')
 
       // then
       expect(pageActions.interactions).toBeDefined()
@@ -425,8 +425,8 @@ describe('PageActions service', () => {
         .pageView()
 
       // when
-      pageActions.firstInteraction('input_enter')
-      pageActions.firstInteraction('input_enter')
+      pageActions.firstAction('input_enter')
+      pageActions.firstAction('input_enter')
 
       // then
       expect(pageActions.interactions.length).toBe(2)
@@ -443,8 +443,8 @@ describe('PageActions service', () => {
         .pageView()
 
       // when
-      pageActions.firstInteraction('input_enter')
-      pageActions.firstInteraction('input_leave')
+      pageActions.firstAction('input_enter')
+      pageActions.firstAction('input_leave')
 
       // then
       expect(pageActions.interactions.length).toBe(3)
@@ -461,8 +461,8 @@ describe('PageActions service', () => {
         .pageView()
 
       // when
-      pageActions.firstInteraction('input_enter', true)
-      pageActions.firstInteraction('input_leave')
+      pageActions.firstAction('input_enter', true)
+      pageActions.firstAction('input_leave')
 
       // then
       expect(pageActions.interactions.length).toBe(2)
@@ -470,7 +470,7 @@ describe('PageActions service', () => {
       expect(pageActions.interactions[1].type).toBe('input_enter')
     })
 
-    test('should send interaction to the collector', () => {
+    test('should send actions to the collector', () => {
       // given
       const pageActions = new PageActions('site.com')
         .collector(COLLECTOR)
@@ -479,7 +479,7 @@ describe('PageActions service', () => {
       vi.runAllTimers()
 
       // when
-      pageActions.firstInteraction('input_enter')
+      pageActions.firstAction('input_enter')
       vi.runAllTimers()
 
       // then

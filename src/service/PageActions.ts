@@ -3,7 +3,7 @@ import { PAGE_VIEW, type Browser, type Interaction, type ViewInteractions } from
 import { UAParser } from 'ua-parser-js';
 import { debounceTime, Subject } from "rxjs";
 
-/** Entry point class to report interactions to the Page Actions */
+/** Entry point class to report actions to the Page Actions collector */
 export class PageActions {
 
   public interactions: Interaction[] = []
@@ -55,7 +55,7 @@ export class PageActions {
   }
 
   /**
-   * Configure your account id for reporting interactions. Must be configured before reporting page view or any interaction.
+   * Configure your account id for reporting actions. Must be configured before reporting page view or any action.
    * @param value An UUID representing your account.
    * @returns Current PageActions service for chaining method calls
    */
@@ -84,11 +84,11 @@ export class PageActions {
     return this
   }
 
-  public interaction(type: string, terminal: boolean = false): PageActions {
+  public action(type: string, terminal: boolean = false): PageActions {
     if (this.terminatedRecording) return this
     if (!this._collectorUrl) throw new Error(COLLECTOR_MISSING_MESSAGE)
     if (!this.isPageViewRegistered()) throw new Error(NO_PAGEVIEW_MESSAGE)
-    if (!type) throw new Error('PageActions.interaction() ' + REQUIRE_TYPE_MESSAGE)
+    if (!type) throw new Error('PageActions.action() ' + REQUIRE_TYPE_MESSAGE)
 
     if (terminal) this.terminatedRecording = true
     const interaction = this.createInteraction(type, terminal)
@@ -98,19 +98,19 @@ export class PageActions {
     return this
   }
 
-  public firstInteraction(type: string, terminal: boolean = false): PageActions {
+  public firstAction(type: string, terminal: boolean = false): PageActions {
     if (this.terminatedRecording) return this
     if (!this._collectorUrl) throw new Error(COLLECTOR_MISSING_MESSAGE)
     if (!this.isPageViewRegistered()) throw new Error(NO_PAGEVIEW_MESSAGE)
-    if (!type) throw new Error('PageActions.firstInteraction() ' + REQUIRE_TYPE_MESSAGE)
+    if (!type) throw new Error('PageActions.firstAction() ' + REQUIRE_TYPE_MESSAGE)
 
     if (terminal) this.terminatedRecording = true
     if (!this.containsInteraction(type)) {
       const interaction = this.createInteraction(type, terminal)
       this.appendInteraction(interaction)
-      if (this._verbose) console.log('Registered first interaction', interaction)
+      if (this._verbose) console.log('Registered first action', interaction)
     } else {
-      if (this._verbose) console.log(`Interaction of type ${type} already registered`)
+      if (this._verbose) console.log(`Action of type ${type} already registered`)
     }
     return this
   }
@@ -185,7 +185,7 @@ export class PageActions {
 
   // extract networking to separate file
   private async sendInteraction(request: ViewInteractions): Promise<void> {
-    if (this._verbose) console.log('Sending interactions to Page Actions', request)
+    if (this._verbose) console.log('Sending actions to Page Actions', request)
     await this.sendInteractionRequest(request)
   }
 
@@ -207,7 +207,7 @@ const CONSTRUCTOR_NO_SITEID_MESSAGE = 'PageActions() constructor require non-emp
 const COLLECTOR_MISSING_MESSAGE = 'Page Actions collector URL not configured. Call .collector(URL) before sending any event'
 const ACCOUNT_ID_MISSING_MESSAGE = 'Page Actions account id not configured. Call .accountId(value) before sending any event'
 const REQUIRE_TYPE_MESSAGE = 'requires non-empty type argument'
-const NO_PAGEVIEW_MESSAGE = 'PageActions.pageView() should always be called before recording any interaction'
+const NO_PAGEVIEW_MESSAGE = 'PageActions.pageView() should always be called before recording any action'
 const GROUP_AFTER_PAGEVIEW_MESSAGE = 'Group name cannot be changed after page view action'
 const ACCOUNT_ID_AFTER_PAGEVIEW_MESSAGE = 'Account id cannot be changed after page view action'
 const REQUIRE_GROUP_MESSAGE = 'Group name cannot be empty'
