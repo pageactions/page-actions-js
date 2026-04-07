@@ -1,10 +1,22 @@
 {
   "name": "@pageactions/page-actions-js",
   "version": "0.9.0",
-  "type": "module",
   "description": "Vanilla JavaScript Page Actions client library",
-  "author": "Page Actions <contact@page-actions.com>",
+  "keywords": [],
+  "homepage": "https://github.com/pageactions/page-actions-js#readme",
+  "bugs": {
+    "url": "https://github.com/pageactions/page-actions-js/issues"
+  },
   "license": "GPL-3.0-only",
+  "author": "Page Actions <contact@page-actions.com>",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pageactions/page-actions-js.git"
+  },
+  "files": [
+    "dist"
+  ],
+  "type": "module",
   "main": "./dist/main.js",
   "module": "./dist/main.js",
   "types": "./dist/main.d.ts",
@@ -14,34 +26,25 @@
       "types": "./dist/main.d.ts"
     }
   },
-  "files": [
-    "dist"
-  ],
   "scripts": {
     "build": "tsc",
     "build:watch": "tsc --watch",
     "build:link": "npm run build && npm link",
     "test": "vitest run",
     "test:watch": "vitest watch",
-    "size": "npx pkg-size ./dist"
-  },
-  "keywords": [],
-  "devDependencies": {
-    "jsdom": "^28.1.0",
-    "pkg-size": "^2.4.0",
-    "typescript": "^5.9.3",
-    "vitest": "^4.0.18"
+    "size": "npx pkg-size ./dist",
+    "fmt": "oxfmt",
+    "fmt:check": "oxfmt --check"
   },
   "dependencies": {
     "rxjs": "^7.8.2",
     "ua-parser-js": "^2.0.9"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/pageactions/page-actions-js.git"
-  },
-  "bugs": {
-    "url": "https://github.com/pageactions/page-actions-js/issues"
-  },
-  "homepage": "https://github.com/pageactions/page-actions-js#readme"
+  "devDependencies": {
+    "jsdom": "^28.1.0",
+    "oxfmt": "^0.44.0",
+    "pkg-size": "^2.4.0",
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.18"
+  }
 }

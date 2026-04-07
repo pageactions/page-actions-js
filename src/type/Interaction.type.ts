@@ -1,5 +1,4 @@
-
-export const PAGE_VIEW = "pv"
+export const PAGE_VIEW = "pv";
 
 export interface Interaction {
   id: string;
@@ -22,6 +21,6 @@ export interface ViewInteractions {
 }
 
 export interface Browser {
-  type?: string,
-  bot: boolean,
+  type?: string;
+  bot: boolean;
 }
