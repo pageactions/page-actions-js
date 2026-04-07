@@ -1,8 +1,8 @@
 {
   "name": "@pageactions/page-actions-js",
-  "version": "0.2.0",
+  "version": "0.9.0",
   "type": "module",
-  "description": "Vanilla JavaScript PageActions client library",
+  "description": "Vanilla JavaScript Page Actions client library",
   "author": "Page Actions <contact@page-actions.com>",
   "license": "GPL-3.0-only",
   "main": "./dist/main.js",
