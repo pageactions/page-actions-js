@@ -1,6 +1,6 @@
 # page-actions-js
 
-This is a [Node.js](https://nodejs.org/en) library that allows publishing events to PageActions analytics dashboard. It's intended for any JS browser application regardless of used framework.
+This is a [Node.js](https://nodejs.org/en) library that allows publishing events to Page Actions analytics dashboard. It's intended for any JS browser application regardless of used framework.
 
 ## Instalation
 
@@ -14,7 +14,7 @@ npm install @pageactions/page-actions-js
 
 Basiclly by creating `PageActions` object and later calling functions when events occur. First interaction should always be a page view represented by a `pageView()` function. You should create only one instance of `PageActions` for a given page/view. If you want to send events from different components, then the same `PageActions` object should be used by these components.
 
-### Create PageActions
+### Create PageActions service
 
 ```ts
 const pageActions = new PageActions('your-site-id.com')
@@ -36,7 +36,7 @@ You can't report any interaction when collector URL or account ID is not configu
 
 This event should be sent every time page is rendered before any user interactions. It starts a new history of consecutive actions.
 
-This function must be called exactly once and should be the first interaction. After a navigation to a different page or a view a new instance of PageActions should created to represent a new page view.
+This function must be called exactly once and should be the first interaction. After a navigation to a different page or a view a new instance of `PageActions` should created to represent a new page view.
 
 It has no parameters and triggers sending an event to the collector service.
 
