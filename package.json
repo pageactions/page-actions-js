@@ -7,7 +7,7 @@
   "bugs": {
     "url": "https://github.com/pageactions/page-actions-js/issues"
   },
-  "license": "",
+  "license": "MIT",
   "author": "Page Actions <contact@page-actions.com>",
   "repository": {
     "type": "git",
