@@ -12,14 +12,14 @@ npm install @pageactions/page-actions-js
 
 ## How to use
 
-Basically by creating `PageActions` object and later calling functions when events occur. First action should always be a page view represented by a `pageView()` function. You should create only one instance of `PageActions` for a given page/view. If you want to send events from different components, then the same `PageActions` object should be used by these components.
+Basically by creating `PageActions` service and later calling functions when events occur. First action should always be a page view represented by a `pageView()` function. You should create only one instance of `PageActions` for a given page/view. If you want to send events from different components, then the same `PageActions` object should be used by these components.
 
 ### Create PageActions service
 
 ```ts
-const pageActions = new PageActions('your-site-id.com')
-  .collector('https://page-actions.com/collector')
-  .accountId('your-account-id')
+const pageActions = new PageActions("your-site-id.com")
+  .collector("https://page-actions.com/collector")
+  .accountId("your-account-id");
 ```
 
 The only parameter of constructor is a **siteId**. This is later used in Page Actions Dashboard to distinguish events from different sites.
@@ -41,7 +41,7 @@ This function must be called exactly once and should be the first action on a pa
 It has no parameters and triggers sending an event to the collector service.
 
 ```ts
-pageActions.pageView()
+pageActions.pageView();
 ```
 
 ### Report action every time
@@ -49,13 +49,15 @@ pageActions.pageView()
 The most basic way of reporting an action is by calling action() function with action type name.
 
 ```ts
-pageActions.action('button_click')
+pageActions.action("button_click");
 ```
 
-There is also a second form of this function with second parameter signaling that this is a terminal action. After such action no further events are recorded and sent to the collector. For example, it is useful to stop recording when form was submitted.
+#### Terminal action
+
+You can pass a second argument to the function with action's options. The `terminal` option marks an action as the last important action on current page. After such action no further events are recorded and sent to the collector. For example, it is useful to stop recording when form was submitted.
 
 ```ts
-pageActions.action('form_submit', true)
+pageActions.action("form_submit", { terminal: true });
 ```
 
 ### Report action only for the first time
@@ -63,7 +65,23 @@ pageActions.action('form_submit', true)
 Sometimes we only want to know that user started interacting with a form and don't want to now how many times such action occurred. In that situation a firstAction() function is used.
 
 ```ts
-pageActions.firstAction('firstname_changed')
+pageActions.firstAction("firstname_changed");
 ```
 
 This action will be reported at most one time. Every further call with the same action type will be ignored during page visit (same PageActions instance).
+
+### Flushing actions
+
+By default, sending actions to the collector is delayed so analytics doesn't impact page performance. Sometimes you may need to send events immediately. For example, when clicking on the button performs navigation to a different page. In such situations a `flush()` method can be used to publish events before current page is closed.
+
+Example:
+
+```ts
+pageActions.flush();
+```
+
+Another way to do this is by using a `flush` option when reporting an action.
+
+```ts
+pageActions.action("focus", { flush: true });
+```

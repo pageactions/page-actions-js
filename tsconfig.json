@@ -11,7 +11,7 @@
     "verbatimModuleSyntax": true,
     "declaration": true,
     "sourceMap": true,
-    "declarationMap": true,
+    "declarationMap": true
 
     // Style Options
     // "noImplicitReturns": true,
