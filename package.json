@@ -1,9 +1,9 @@
 {
   "name": "@pageactions/page-actions-js",
   "version": "0.9.0",
-  "description": "Vanilla JavaScript Page Actions client library",
+  "description": "Page Actions JavaScript client library",
   "keywords": [],
-  "homepage": "https://github.com/pageactions/page-actions-js#readme",
+  "homepage": "https://www.page-actions.com",
   "bugs": {
     "url": "https://github.com/pageactions/page-actions-js/issues"
   },
