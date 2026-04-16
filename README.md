@@ -1,6 +1,6 @@
 # page-actions-js
 
-This is a [Node.js](https://nodejs.org/en) library that allows publishing events to Page Actions analytics dashboard. It's intended for any JS browser application regardless of used framework.
+This is a [Node.js](https://nodejs.org/en) library that allows publishing events to the [Page Actions](https://www.page-actions.com) analytics. It's intended for any JS browser application regardless of used framework.
 
 ## Installation
 
@@ -18,7 +18,7 @@ Basically by creating `PageActions` service and later calling functions when eve
 
 ```ts
 const pageActions = new PageActions("your-site-id.com")
-  .collector("https://page-actions.com/collector")
+  .collector("https://app.page-actions.com/collector")
   .accountId("your-account-id");
 ```
 
