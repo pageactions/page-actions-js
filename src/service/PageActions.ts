@@ -10,8 +10,12 @@ import { debounceTime, Subject } from "rxjs";
 
 /** Object for optional action's options */
 export interface ActionOptions {
+  /** Terminal action represents the last action on a page and no more actions are recorded */
   terminal?: boolean;
+  /** Whether actions should be immediately sent to the collector after registering an action */
   flush?: boolean;
+  /** Whether registered action is a conversion action. It represents business goal on a page */
+  conversion?: boolean;
 }
 
 /** Entry point class to report actions to the Page Actions collector */
@@ -87,7 +91,7 @@ export class PageActions {
     if (!this._collectorUrl) throw new Error(COLLECTOR_MISSING_MESSAGE);
     if (!this._accountId) throw new Error(ACCOUNT_ID_MISSING_MESSAGE);
     this.determineBrowser();
-    const interaction = this.createInteraction(PAGE_VIEW);
+    const interaction = this.createInteraction(PAGE_VIEW, {});
     this.pageViewId = interaction.id;
     this.appendInteraction(interaction);
     if (this._verbose) console.log("Registered page view", interaction);
@@ -107,7 +111,7 @@ export class PageActions {
     if (!type) throw new Error("PageActions.action() " + REQUIRE_TYPE_MESSAGE);
 
     if (options?.terminal) this.terminatedRecording = true;
-    const interaction = this.createInteraction(type);
+    const interaction = this.createInteraction(type, options);
     this.appendInteraction(interaction);
 
     if (this._verbose) console.log("Registered interaction", interaction);
@@ -128,7 +132,7 @@ export class PageActions {
     if (!type) throw new Error("PageActions.firstAction() " + REQUIRE_TYPE_MESSAGE);
     if (options?.terminal) this.terminatedRecording = true;
     if (!this.containsInteraction(type)) {
-      const interaction = this.createInteraction(type);
+      const interaction = this.createInteraction(type, options);
       this.appendInteraction(interaction);
       if (this._verbose) console.log("Registered first action", interaction);
     } else {
@@ -151,11 +155,12 @@ export class PageActions {
     return this.interactions.findIndex((it) => it.type === interactionType) >= 0;
   }
 
-  private createInteraction(type: string): Interaction {
+  private createInteraction(type: string, options: ActionOptions): Interaction {
     return {
       id: this.generateId(),
       type,
       time: new Date(),
+      conversion: options.conversion,
     } as Interaction;
   }
 
