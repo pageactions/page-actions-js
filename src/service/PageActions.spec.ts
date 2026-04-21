@@ -269,6 +269,26 @@ describe("PageActions service", () => {
       });
     });
 
+    test("should send conversion action to the collector", () => {
+      // given
+      const pageActions = new PageActions("site.com")
+        .collector(COLLECTOR)
+        .accountId(ACCOUNT_ID)
+        .pageView();
+      vi.runAllTimers();
+
+      // when
+      pageActions.action("submit_form", { conversion: true });
+      vi.runAllTimers();
+
+      // then
+      expect(fetch).toHaveBeenCalledTimes(2);
+      expect(lastFetchRequestBody()).toMatchObject({
+        site: "site.com",
+        interactions: [{ type: "pv" }, { type: "submit_form", conversion: true }],
+      });
+    });
+
     test("should not append any events after terminal event registered", () => {
       // given
       const pageActions = new PageActions("site.com")
@@ -458,6 +478,26 @@ describe("PageActions service", () => {
       expect(lastFetchRequestBody()).toMatchObject({
         site: "site.com",
         interactions: [{ type: "pv" }, { type: "input_enter" }],
+      });
+    });
+
+    test("should send conversion action to the collector", () => {
+      // given
+      const pageActions = new PageActions("site.com")
+        .collector(COLLECTOR)
+        .accountId(ACCOUNT_ID)
+        .pageView();
+      vi.runAllTimers();
+
+      // when
+      pageActions.firstAction("submit_form", { conversion: true });
+      vi.runAllTimers();
+
+      // then
+      expect(fetch).toHaveBeenCalledTimes(2);
+      expect(lastFetchRequestBody()).toMatchObject({
+        site: "site.com",
+        interactions: [{ type: "pv" }, { type: "submit_form", conversion: true }],
       });
     });
   });

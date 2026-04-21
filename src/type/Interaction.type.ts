@@ -4,6 +4,7 @@ export interface Interaction {
   id: string;
   type: string;
   time: Date;
+  conversion?: boolean;
 }
 
 export interface ViewInteractions {

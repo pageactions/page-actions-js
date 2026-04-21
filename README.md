@@ -52,12 +52,26 @@ The most basic way of reporting an action is by calling action() function with a
 pageActions.action("button_click");
 ```
 
+#### Conversion action
+
+You can mark an action as a convertion when it represents a business goal. For example, submitting a form or create a new user action.
+
+```ts
+pageActions.action("create_account", { conversion: true });
+```
+
 #### Terminal action
 
 You can pass a second argument to the function with action's options. The `terminal` option marks an action as the last important action on current page. After such action no further events are recorded and sent to the collector. For example, it is useful to stop recording when form was submitted.
 
 ```ts
 pageActions.action("form_submit", { terminal: true });
+```
+
+An action can be a conversion and terminal action at the same time:
+
+```ts
+pageActions.action("form_submit", { conversion: true, terminal: true });
 ```
 
 ### Report action only for the first time
