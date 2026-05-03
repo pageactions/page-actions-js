@@ -352,6 +352,28 @@ describe("PageActions service", () => {
       // and
       expect(fetch).toHaveBeenCalledTimes(3);
     });
+
+    test("should send interactions request with keep alive parameter to guarantee delivery when leaving a page", () => {
+      // given
+      const pageActions = new PageActions("site.com")
+        .collector(COLLECTOR)
+        .accountId(ACCOUNT_ID)
+        .pageView();
+      vi.runAllTimers();
+
+      // when
+      pageActions.action("submit", { flush: true });
+
+      // then
+      expect(fetch).toHaveBeenCalledTimes(2);
+      expect(lastFetchRequestBody()).toMatchObject({
+        site: "site.com",
+        interactions: [{ type: "pv" }, { type: "submit" }],
+      });
+      expect(lastFetchRequestOptions()).toMatchObject({
+        keepalive: true
+      });
+    });
   });
 
   describe("firstAction()", () => {
@@ -545,12 +567,19 @@ describe("PageActions service", () => {
     });
   });
 
-  function lastFetchRequestBody() {
+  function lastFetchRequestBody(): any {
+    const lastRequest = lastFetchRequestOptions()
+    if (!lastRequest?.body) {
+      throw new Error("Last fetch call had no body");
+    }
+    return JSON.parse(lastRequest!.body as string);
+  }
+
+  function lastFetchRequestOptions(): RequestInit  {
     const fetchCalls = vi.mocked(fetch).mock.calls.length;
     if (fetchCalls > 0) {
       const [, options] = vi.mocked(fetch).mock.calls[fetchCalls - 1];
-      if (!options?.body) throw new Error("Last fetch call had no body");
-      return JSON.parse(options!.body as string);
+      return options as RequestInit;
     } else {
       throw new Error("No fetch call performed");
     }

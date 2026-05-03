@@ -229,6 +229,7 @@ export class PageActions {
       headers,
       body: JSON.stringify(request),
       priority: "low",
+      keepalive: true,
     } as RequestInit;
     return fetch(`${this._collectorUrl}/pageview/interactions`, options);
   }
