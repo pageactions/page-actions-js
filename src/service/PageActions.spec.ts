@@ -268,7 +268,7 @@ describe("PageActions service", () => {
       expect(pageActions.interactions[1].type).toBe("input_enter");
     });
 
-        test("should not append and event with same type twice when firstOnly is false", () => {
+    test("should not append and event with same type twice when firstOnly is false", () => {
       // given
       const pageActions = new PageActions("site.com")
         .collector(COLLECTOR)
@@ -408,7 +408,7 @@ describe("PageActions service", () => {
         interactions: [{ type: "pv" }, { type: "submit" }],
       });
       expect(lastFetchRequestOptions()).toMatchObject({
-        keepalive: true
+        keepalive: true,
       });
     });
   });
@@ -605,14 +605,14 @@ describe("PageActions service", () => {
   });
 
   function lastFetchRequestBody(): any {
-    const lastRequest = lastFetchRequestOptions()
+    const lastRequest = lastFetchRequestOptions();
     if (!lastRequest?.body) {
       throw new Error("Last fetch call had no body");
     }
     return JSON.parse(lastRequest!.body as string);
   }
 
-  function lastFetchRequestOptions(): RequestInit  {
+  function lastFetchRequestOptions(): RequestInit {
     const fetchCalls = vi.mocked(fetch).mock.calls.length;
     if (fetchCalls > 0) {
       const [, options] = vi.mocked(fetch).mock.calls[fetchCalls - 1];
