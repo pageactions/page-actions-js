@@ -16,6 +16,8 @@ export interface ActionOptions {
   flush?: boolean;
   /** Whether registered action is a conversion action. It represents business goal on a page */
   conversion?: boolean;
+  /** If set to true then only first action with given type will be collected. The next actions with this type will be ignored. */
+  firstOnly?: boolean;
 }
 
 /** Entry point class to report actions to the Page Actions collector */
@@ -111,11 +113,14 @@ export class PageActions {
     if (!type) throw new Error("PageActions.action() " + REQUIRE_TYPE_MESSAGE);
 
     if (options?.terminal) this.terminatedRecording = true;
-    const interaction = this.createInteraction(type, options);
-    this.appendInteraction(interaction);
-
-    if (this._verbose) console.log("Registered interaction", interaction);
-    if (options?.flush) this.flush();
+    if (options.firstOnly && this.containsInteraction(type)) {
+      if (this._verbose) console.log(`Action of type ${type} already registered`);
+    } else {
+      const interaction = this.createInteraction(type, options);
+      this.appendInteraction(interaction);
+      if (this._verbose) console.log("Registered interaction", interaction);
+      if (options?.flush) this.flush();
+    }
     return this;
   }
 

@@ -249,6 +249,43 @@ describe("PageActions service", () => {
       expect(pageActions.interactions[1].type).toBe("submit");
     });
 
+    // Options
+
+    test("should not append and event with same type twice when firstOnly", () => {
+      // given
+      const pageActions = new PageActions("site.com")
+        .collector(COLLECTOR)
+        .accountId(ACCOUNT_ID)
+        .pageView();
+
+      // when
+      pageActions.action("input_enter", { firstOnly: true });
+      pageActions.action("input_enter", { firstOnly: true });
+
+      // then
+      expect(pageActions.interactions.length).toBe(2);
+      expect(pageActions.interactions[0].type).toBe("pv");
+      expect(pageActions.interactions[1].type).toBe("input_enter");
+    });
+
+        test("should not append and event with same type twice when firstOnly is false", () => {
+      // given
+      const pageActions = new PageActions("site.com")
+        .collector(COLLECTOR)
+        .accountId(ACCOUNT_ID)
+        .pageView();
+
+      // when
+      pageActions.action("input_enter", { firstOnly: false });
+      pageActions.action("input_enter", { firstOnly: false });
+
+      // then
+      expect(pageActions.interactions.length).toBe(3);
+      expect(pageActions.interactions[0].type).toBe("pv");
+      expect(pageActions.interactions[1].type).toBe("input_enter");
+      expect(pageActions.interactions[2].type).toBe("input_enter");
+    });
+
     test("should send action to the collector", () => {
       // given
       const pageActions = new PageActions("site.com")

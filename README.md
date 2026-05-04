@@ -44,13 +44,25 @@ It has no parameters and triggers sending an event to the collector service.
 pageActions.pageView();
 ```
 
-### Report action every time
+### Report an action
 
 The most basic way of reporting an action is by calling action() function with action type name.
 
 ```ts
 pageActions.action("button_click");
 ```
+
+#### First only
+
+Sometimes we only want to know that user started interacting with a form and don't want to now how many times such action occurred. In that situation a `firstOnly` option can be used.
+
+If you want to register only the first occurence of the action just set `firstOnly` to `true`.
+
+```ts
+pageActions.action("input_focus", { firstOnly: true });
+```
+
+It is the same as reporting an action with `firstAction()` function.
 
 #### Conversion action
 
