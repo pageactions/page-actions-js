@@ -26,7 +26,7 @@ The only parameter of constructor is a **siteId**. This is later used in Page Ac
 
 After creating new object it's mandatory to set a **collector URL** and **account ID**.
 
-Collector URL is a place where all your actions are sent. You can see your collector URL when you add new site in Page Actions Dashboard.
+Collector URL is a place where all your actions are sent. You can see your collector URL when you add new site in Page Actions Dashboard. If you don't want your actions to be stored (for example from local or test environment), set collector URL to *https://app.page-actions.com/test-collector*.
 
 Account ID is your unique UUID identifier that you can get from your Account settings or get during new site onboarding.
 
