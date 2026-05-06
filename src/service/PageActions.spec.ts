@@ -87,6 +87,7 @@ describe("PageActions service", () => {
 
       // then
       expect(fetch).toHaveBeenCalledTimes(1);
+      expect(lastFetchRequestUrl()).toBe(COLLECTOR + "/interactions");
       expect(lastFetchRequestBody()).toMatchObject({
         accountId: "acc1",
         site: "site.com",
@@ -300,6 +301,7 @@ describe("PageActions service", () => {
 
       // then
       expect(fetch).toHaveBeenCalledTimes(2);
+      expect(lastFetchRequestUrl()).toBe(COLLECTOR + "/interactions");
       expect(lastFetchRequestBody()).toMatchObject({
         site: "site.com",
         interactions: [{ type: "pv" }, { type: "submit" }],
@@ -617,6 +619,16 @@ describe("PageActions service", () => {
     if (fetchCalls > 0) {
       const [, options] = vi.mocked(fetch).mock.calls[fetchCalls - 1];
       return options as RequestInit;
+    } else {
+      throw new Error("No fetch call performed");
+    }
+  }
+
+  function lastFetchRequestUrl(): string {
+    const fetchCalls = vi.mocked(fetch).mock.calls.length;
+    if (fetchCalls > 0) {
+      const [url, _] = vi.mocked(fetch).mock.calls[fetchCalls - 1];
+      return url as string;
     } else {
       throw new Error("No fetch call performed");
     }
