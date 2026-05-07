@@ -33,6 +33,8 @@ export class PageActions {
   private _verbose: boolean = false;
   private _accountId: string | undefined = undefined;
   private _groupName: string = "default";
+  private _pageUrl: string | undefined = undefined;
+  private _referrer: string | undefined = undefined;
 
   private _debounceTimeMs = 2000;
   private interactionStream: Subject<Interaction> = new Subject<Interaction>();
@@ -92,7 +94,10 @@ export class PageActions {
   public pageView(): PageActions {
     if (!this._collectorUrl) throw new Error(COLLECTOR_MISSING_MESSAGE);
     if (!this._accountId) throw new Error(ACCOUNT_ID_MISSING_MESSAGE);
+    if (this.interactions.length > 0) throw new Error(PAGEVIEW_REPEATED_MESSAGE);
     this.determineBrowser();
+    this._pageUrl = document.location.href;
+    this._referrer = document.referrer;
     const interaction = this.createInteraction(PAGE_VIEW, {});
     this.pageViewId = interaction.id;
     this.appendInteraction(interaction);
@@ -214,8 +219,8 @@ export class PageActions {
       interactions: this.interactions,
       viewStartedAt: new Date(),
       browser: this.browser,
-      referrer: document.referrer,
-      pageUrl: document.location.href,
+      referrer: this._referrer,
+      pageUrl: this._pageUrl,
       userAgent: navigator.userAgent,
     } as ViewInteractions;
   }
@@ -251,3 +256,4 @@ const GROUP_AFTER_PAGEVIEW_MESSAGE = "Group name cannot be changed after page vi
 const ACCOUNT_ID_AFTER_PAGEVIEW_MESSAGE = "Account id cannot be changed after page view action";
 const REQUIRE_GROUP_MESSAGE = "Group name cannot be empty";
 const REQUIRE_ACCOUNT_ID_MESSAGE = "Account id cannot be empty";
+const PAGEVIEW_REPEATED_MESSAGE = "Function pageView() can be called at most once with given PageActions object";

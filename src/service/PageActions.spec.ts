@@ -128,6 +128,101 @@ describe("PageActions service", () => {
       expect(pageActions.browser?.type).toBeUndefined();
       expect(pageActions.browser?.bot).toBeFalsy();
     });
+
+    test("should throw error when pageView is called second time with same PageActions object", () => {
+      // given
+      const pageActions = new PageActions("site.com")
+        .collector(COLLECTOR)
+        .accountId(ACCOUNT_ID)
+        .pageView();
+
+      // then
+      expect(() => pageActions.pageView()).toThrow(
+        /Function pageView\(\) can be called at most once with given PageActions object/,
+      );
+    });
+
+    test("should read page url and send it to collector", async () => {
+      // given
+      window.history.pushState({}, '', '/blog')
+      const pageActions = new PageActions("site.com").collector(COLLECTOR).accountId(ACCOUNT_ID);
+
+      // when
+      pageActions.pageView();
+      vi.runAllTimers();
+      
+      // then
+      expect(fetch).toHaveBeenCalledTimes(1);
+      expect(lastFetchRequestBody()).toMatchObject({
+        pageUrl: "http://localhost:3000/blog",
+      });
+    });
+
+    test("should send original page url when action reported after url changed", async () => {
+      // given
+      window.history.pushState({}, '', '/blog')
+      const pageActions = new PageActions("site.com").collector(COLLECTOR).accountId(ACCOUNT_ID);
+
+      // and
+      pageActions.pageView();
+      vi.runAllTimers();
+
+      // when
+      window.history.pushState({}, '', '/about')
+      pageActions.action('link_click')
+      vi.runAllTimers();
+      
+      // then
+      expect(fetch).toHaveBeenCalledTimes(2);
+      expect(lastFetchRequestBody()).toMatchObject({
+        pageUrl: "http://localhost:3000/blog",
+      });
+    });
+
+    test("should read referrer and send it to collector", async () => {
+      // given
+      Object.defineProperty(document, 'referrer', {
+        configurable: true,
+        get: () => 'https://page-actions.com',
+      })
+      // and
+      const pageActions = new PageActions("site.com").collector(COLLECTOR).accountId(ACCOUNT_ID);
+
+      // when
+      pageActions.pageView();
+      vi.runAllTimers();
+      
+      // then
+      expect(fetch).toHaveBeenCalledTimes(1);
+      expect(lastFetchRequestBody()).toMatchObject({
+        referrer: "https://page-actions.com",
+      });
+    });
+
+    test("should send original referrer when action reported after url changed", async () => {
+      // given
+      window.history.pushState({}, '', '/blog')
+      const pageActions = new PageActions("site.com").collector(COLLECTOR).accountId(ACCOUNT_ID);
+
+      // and
+      pageActions.pageView();
+      vi.runAllTimers();
+
+      // when
+      window.history.pushState({}, '', '/about')
+      Object.defineProperty(document, 'referrer', {
+        configurable: true,
+        get: () => 'http://localhost:3000/blog',
+      })
+      pageActions.action('link_click')
+      vi.runAllTimers();
+      
+      // then
+      expect(fetch).toHaveBeenCalledTimes(2);
+      expect(lastFetchRequestBody()).toMatchObject({
+        referrer: "https://page-actions.com",
+      });
+    });
   });
 
   describe("groupName()", () => {
