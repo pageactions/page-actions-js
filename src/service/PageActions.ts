@@ -236,7 +236,7 @@ export class PageActions {
       priority: "low",
       keepalive: true,
     } as RequestInit;
-    return fetch(`${this._collectorUrl}/pageview/interactions`, options);
+    return fetch(`${this._collectorUrl}/interactions`, options);
   }
 }
 const CONSTRUCTOR_NO_SITEID_MESSAGE = "PageActions() constructor require non-empty siteId argument";
