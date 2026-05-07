@@ -144,13 +144,13 @@ describe("PageActions service", () => {
 
     test("should read page url and send it to collector", async () => {
       // given
-      window.history.pushState({}, '', '/blog')
+      window.history.pushState({}, "", "/blog");
       const pageActions = new PageActions("site.com").collector(COLLECTOR).accountId(ACCOUNT_ID);
 
       // when
       pageActions.pageView();
       vi.runAllTimers();
-      
+
       // then
       expect(fetch).toHaveBeenCalledTimes(1);
       expect(lastFetchRequestBody()).toMatchObject({
@@ -160,7 +160,7 @@ describe("PageActions service", () => {
 
     test("should send original page url when action reported after url changed", async () => {
       // given
-      window.history.pushState({}, '', '/blog')
+      window.history.pushState({}, "", "/blog");
       const pageActions = new PageActions("site.com").collector(COLLECTOR).accountId(ACCOUNT_ID);
 
       // and
@@ -168,10 +168,10 @@ describe("PageActions service", () => {
       vi.runAllTimers();
 
       // when
-      window.history.pushState({}, '', '/about')
-      pageActions.action('link_click')
+      window.history.pushState({}, "", "/about");
+      pageActions.action("link_click");
       vi.runAllTimers();
-      
+
       // then
       expect(fetch).toHaveBeenCalledTimes(2);
       expect(lastFetchRequestBody()).toMatchObject({
@@ -181,17 +181,17 @@ describe("PageActions service", () => {
 
     test("should read referrer and send it to collector", async () => {
       // given
-      Object.defineProperty(document, 'referrer', {
+      Object.defineProperty(document, "referrer", {
         configurable: true,
-        get: () => 'https://page-actions.com',
-      })
+        get: () => "https://page-actions.com",
+      });
       // and
       const pageActions = new PageActions("site.com").collector(COLLECTOR).accountId(ACCOUNT_ID);
 
       // when
       pageActions.pageView();
       vi.runAllTimers();
-      
+
       // then
       expect(fetch).toHaveBeenCalledTimes(1);
       expect(lastFetchRequestBody()).toMatchObject({
@@ -201,7 +201,7 @@ describe("PageActions service", () => {
 
     test("should send original referrer when action reported after url changed", async () => {
       // given
-      window.history.pushState({}, '', '/blog')
+      window.history.pushState({}, "", "/blog");
       const pageActions = new PageActions("site.com").collector(COLLECTOR).accountId(ACCOUNT_ID);
 
       // and
@@ -209,14 +209,14 @@ describe("PageActions service", () => {
       vi.runAllTimers();
 
       // when
-      window.history.pushState({}, '', '/about')
-      Object.defineProperty(document, 'referrer', {
+      window.history.pushState({}, "", "/about");
+      Object.defineProperty(document, "referrer", {
         configurable: true,
-        get: () => 'http://localhost:3000/blog',
-      })
-      pageActions.action('link_click')
+        get: () => "http://localhost:3000/blog",
+      });
+      pageActions.action("link_click");
       vi.runAllTimers();
-      
+
       // then
       expect(fetch).toHaveBeenCalledTimes(2);
       expect(lastFetchRequestBody()).toMatchObject({

@@ -256,4 +256,5 @@ const GROUP_AFTER_PAGEVIEW_MESSAGE = "Group name cannot be changed after page vi
 const ACCOUNT_ID_AFTER_PAGEVIEW_MESSAGE = "Account id cannot be changed after page view action";
 const REQUIRE_GROUP_MESSAGE = "Group name cannot be empty";
 const REQUIRE_ACCOUNT_ID_MESSAGE = "Account id cannot be empty";
-const PAGEVIEW_REPEATED_MESSAGE = "Function pageView() can be called at most once with given PageActions object";
+const PAGEVIEW_REPEATED_MESSAGE =
+  "Function pageView() can be called at most once with given PageActions object";
