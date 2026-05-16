@@ -116,19 +116,6 @@ describe("PageActions service", () => {
       expect(pageActions.pageViewId).toBe(pageActions.interactions[0].id);
     });
 
-    test("should init browser object based on user agent", () => {
-      // given
-      const pageActions = new PageActions("site.com").collector(COLLECTOR).accountId(ACCOUNT_ID);
-
-      // when
-      pageActions.pageView();
-
-      // then
-      expect(pageActions.browser).toBeDefined();
-      expect(pageActions.browser?.type).toBeUndefined();
-      expect(pageActions.browser?.bot).toBeFalsy();
-    });
-
     test("should throw error when pageView is called second time with same PageActions object", () => {
       // given
       const pageActions = new PageActions("site.com")

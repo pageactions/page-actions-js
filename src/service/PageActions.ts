@@ -1,11 +1,4 @@
-import { Crawlers } from "ua-parser-js/extensions";
-import {
-  PAGE_VIEW,
-  type Browser,
-  type Interaction,
-  type ViewInteractions,
-} from "../type/Interaction.type.js";
-import { UAParser } from "ua-parser-js";
+import { PAGE_VIEW, type Interaction, type ViewInteractions } from "../type/Interaction.type.js";
 import { debounceTime, Subject } from "rxjs";
 
 /** Object for optional action's options */
@@ -25,8 +18,6 @@ export class PageActions {
   public interactions: Interaction[] = [];
   public pageViewId: string | undefined = undefined;
   private terminatedRecording: boolean = false;
-
-  public browser?: Browser;
 
   private _collectorUrl: string | undefined = undefined;
   private _siteId: string | undefined = undefined;
@@ -95,7 +86,6 @@ export class PageActions {
     if (!this._collectorUrl) throw new Error(COLLECTOR_MISSING_MESSAGE);
     if (!this._accountId) throw new Error(ACCOUNT_ID_MISSING_MESSAGE);
     if (this.interactions.length > 0) throw new Error(PAGEVIEW_REPEATED_MESSAGE);
-    this.determineBrowser();
     this._pageUrl = document.location.href;
     this._referrer = document.referrer;
     const interaction = this.createInteraction(PAGE_VIEW, {});
@@ -187,15 +177,6 @@ export class PageActions {
     }
   }
 
-  private determineBrowser(): void {
-    const parser = new UAParser(Crawlers);
-    const results = parser.getResult();
-    this.browser = {
-      type: results.browser.type,
-      bot: results.browser.type === "crawler",
-    } as Browser;
-  }
-
   private isPageViewRegistered(): boolean {
     return this.interactions.length > 0 && this.interactions[0].type === "pv";
   }
@@ -218,10 +199,8 @@ export class PageActions {
       pageViewId: this.pageViewId as string,
       interactions: this.interactions,
       viewStartedAt: new Date(),
-      browser: this.browser,
       referrer: this._referrer,
       pageUrl: this._pageUrl,
-      userAgent: navigator.userAgent,
     } as ViewInteractions;
   }
 

@@ -14,13 +14,6 @@ export interface ViewInteractions {
   pageViewId: string;
   viewStartedAt: Date;
   interactions: Interaction[];
-  browser?: Browser;
   referrer?: string;
   pageUrl?: string;
-  userAgent?: string;
-}
-
-export interface Browser {
-  type?: string;
-  bot: boolean;
 }

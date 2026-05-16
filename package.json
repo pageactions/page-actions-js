@@ -37,8 +37,7 @@
     "fmt:check": "oxfmt --check"
   },
   "dependencies": {
-    "rxjs": "^7.8.2",
-    "ua-parser-js": "^2.0.9"
+    "rxjs": "^7.8.2"
   },
   "devDependencies": {
     "jsdom": "^28.1.0",
