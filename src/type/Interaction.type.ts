@@ -1,3 +1,5 @@
+import type { VisibilityChange } from "./visibility.type.js";
+
 export const PAGE_VIEW = "pv";
 
 export interface Interaction {
@@ -16,4 +18,5 @@ export interface ViewInteractions {
   interactions: Interaction[];
   referrer?: string;
   pageUrl?: string;
+  visibility: VisibilityChange[];
 }

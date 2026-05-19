@@ -1,5 +1,6 @@
 import { PAGE_VIEW, type Interaction, type ViewInteractions } from "../type/Interaction.type.js";
 import { debounceTime, Subject } from "rxjs";
+import { VISIBLITY_IN, VISIBLITY_OUT, type VisibilityChange } from "../type/visibility.type.js";
 
 /** Object for optional action's options */
 export interface ActionOptions {
@@ -26,6 +27,7 @@ export class PageActions {
   private _groupName: string = "default";
   private _pageUrl: string | undefined = undefined;
   private _referrer: string | undefined = undefined;
+  private _visibilityChanges: VisibilityChange[] = [];
 
   private _debounceTimeMs = 2000;
   private interactionStream: Subject<Interaction> = new Subject<Interaction>();
@@ -151,7 +153,33 @@ export class PageActions {
     return this;
   }
 
-  public containsInteraction(interactionType: string): boolean {
+  /**
+   * Report page enters visible state
+   * @returns Current PageActions service
+   */
+  public pageVisible(): PageActions {
+    this._visibilityChanges.push({
+      type: VISIBLITY_IN,
+      at: new Date().toISOString(),
+    });
+    return this;
+  }
+
+  /**
+   * Report page enters hidden state
+   * @returns Current PageActions service
+   */
+  public pageHidden(): PageActions {
+    this._visibilityChanges.push({
+      type: VISIBLITY_OUT,
+      at: new Date().toISOString(),
+    });
+    return this;
+  }
+
+  // Private
+
+  private containsInteraction(interactionType: string): boolean {
     return this.interactions.findIndex((it) => it.type === interactionType) >= 0;
   }
 
@@ -201,6 +229,7 @@ export class PageActions {
       viewStartedAt: new Date(),
       referrer: this._referrer,
       pageUrl: this._pageUrl,
+      visibility: this._visibilityChanges,
     } as ViewInteractions;
   }
 
