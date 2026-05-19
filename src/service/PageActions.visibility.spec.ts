@@ -14,55 +14,11 @@ describe("PageActions service - visibility", () => {
     vi.restoreAllMocks();
   });
 
-  test("should send empty visibility changes to the collector after page view", () => {
+  test("should send page visibile state to the collector after page view", () => {
     // given
     const pageActions = new PageActions("site.com").collector(COLLECTOR).accountId("acc1");
 
     // when
-    pageActions.pageView();
-    vi.runAllTimers();
-
-    // then
-    expect(fetch).toHaveBeenCalledTimes(1);
-    expect(lastFetchRequestUrl()).toBe(COLLECTOR + "/interactions");
-    expect(lastFetchRequestBody()).toMatchObject({
-      accountId: "acc1",
-      site: "site.com",
-      interactions: [{ type: "pv" }],
-      visibility: [],
-    });
-  });
-
-  test("should send in visibility change after page view", () => {
-    // given
-    const pageActions = new PageActions("site.com").collector(COLLECTOR).accountId("acc1");
-
-    // when
-    pageActions.pageView();
-    pageActions.pageVisible();
-    vi.runAllTimers();
-
-    // then
-    expect(fetch).toHaveBeenCalledTimes(1);
-    expect(lastFetchRequestUrl()).toBe(COLLECTOR + "/interactions");
-    expect(lastFetchRequestBody()).toMatchObject({
-      accountId: "acc1",
-      site: "site.com",
-      interactions: [{ type: "pv" }],
-      visibility: [
-        {
-          type: "in",
-        },
-      ],
-    });
-  });
-
-  test("should send in visibility change before page view", () => {
-    // given
-    const pageActions = new PageActions("site.com").collector(COLLECTOR).accountId("acc1");
-
-    // when
-    pageActions.pageVisible();
     pageActions.pageView();
     vi.runAllTimers();
 
@@ -81,12 +37,36 @@ describe("PageActions service - visibility", () => {
     });
   });
 
-  test("should send in and out visibility change before page view", () => {
+  test("should ignore visibility changes before page view", () => {
     // given
     const pageActions = new PageActions("site.com").collector(COLLECTOR).accountId("acc1");
 
     // when
     pageActions.pageVisible();
+    pageActions.pageHidden();
+    pageActions.pageView();
+    vi.runAllTimers();
+
+    // then
+    expect(fetch).toHaveBeenCalledTimes(1);
+    expect(lastFetchRequestUrl()).toBe(COLLECTOR + "/interactions");
+    expect(lastFetchRequestBody()).toMatchObject({
+      accountId: "acc1",
+      site: "site.com",
+      interactions: [{ type: "pv" }],
+      visibility: [
+        {
+          type: "in",
+        },
+      ],
+    });
+  });
+
+  test("should send visibility change reported after page view", () => {
+    // given
+    const pageActions = new PageActions("site.com").collector(COLLECTOR).accountId("acc1");
+
+    // when
     pageActions.pageView();
     pageActions.pageHidden();
     vi.runAllTimers();
@@ -104,6 +84,37 @@ describe("PageActions service - visibility", () => {
         },
         {
           type: "out",
+        },
+      ],
+    });
+  });
+
+  test("should send multiple reported visibility changes after page view", () => {
+    // given
+    const pageActions = new PageActions("site.com").collector(COLLECTOR).accountId("acc1");
+
+    // when
+    pageActions.pageView();
+    pageActions.pageHidden();
+    pageActions.pageVisible();
+    vi.runAllTimers();
+
+    // then
+    expect(fetch).toHaveBeenCalledTimes(1);
+    expect(lastFetchRequestUrl()).toBe(COLLECTOR + "/interactions");
+    expect(lastFetchRequestBody()).toMatchObject({
+      accountId: "acc1",
+      site: "site.com",
+      interactions: [{ type: "pv" }],
+      visibility: [
+        {
+          type: "in",
+        },
+        {
+          type: "out",
+        },
+        {
+          type: "in",
         },
       ],
     });

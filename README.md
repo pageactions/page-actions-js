@@ -96,9 +96,29 @@ pageActions.firstAction("firstname_changed");
 
 This action will be reported at most one time. Every further call with the same action type will be ignored during page visit (same PageActions instance).
 
+### Page visit duration
+
+Page Action can calculate the total time the user spent on a page. However, to calculate this time correctly, we need to know when a user switches browser tabs or closes the page.
+
+You can register a default visibility change handler that uses [visibilitychange](https://developer.mozilla.org/en-US/docs/Web/API/Document/visibilitychange_event) event listener:
+
+```ts
+pageActions.pageView();
+pageActions.registerVisibilityListener();
+```
+
+The other method is to manually call functions when the page becomes hidden or visible. Remember that a `pageView()` function registers a `page visible` event by default.
+
+```ts
+pageActions.pageVisible();
+pageActions.pageHidden();
+```
+
+The extra benefit of the default handler is that it automatically flushes all events when the page is closed.
+
 ### Flushing actions
 
-By default, sending actions to the collector is delayed so analytics doesn't impact page performance. Sometimes you may need to send events immediately. For example, when clicking on the button performs navigation to a different page. In such situations a `flush()` method can be used to publish events before current page is closed.
+By default, sending actions to the collector is delayed so analytics doesn't impact page performance. Sometimes you may need to send events immediately. For example, when a user clicks on the button that performs navigation to a different page. In such a situation, a `flush()` method can be used to publish events before the current page is closed.
 
 Example:
 

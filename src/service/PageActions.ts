@@ -77,6 +77,12 @@ export class PageActions {
     return this;
   }
 
+  /**
+   * Configure your group ID for reported actions. Must be configured before reporting page view or any action.
+   * It should be used if you want to measure different things or single page or you have same form on different pages. You can filter page views by group ID in the dashboard.
+   * @param value A Group ID for reported actions, 'default' if not provided
+   * @returns Current PageActions service for chaining method calls
+   */
   public group(value: string): PageActions {
     if (!value) throw new Error(REQUIRE_GROUP_MESSAGE);
     if (this.interactions.length > 0) throw new Error(GROUP_AFTER_PAGEVIEW_MESSAGE);
@@ -84,12 +90,18 @@ export class PageActions {
     return this;
   }
 
+  /**
+   * Reports page view event. Must be called only once before any page action is reported.
+   * @returns Current PageActions service for chaining method calls
+   */
   public pageView(): PageActions {
     if (!this._collectorUrl) throw new Error(COLLECTOR_MISSING_MESSAGE);
     if (!this._accountId) throw new Error(ACCOUNT_ID_MISSING_MESSAGE);
     if (this.interactions.length > 0) throw new Error(PAGEVIEW_REPEATED_MESSAGE);
     this._pageUrl = document.location.href;
     this._referrer = document.referrer;
+    this._visibilityChanges = [];
+    if (document.visibilityState === "visible") this.pageVisible();
     const interaction = this.createInteraction(PAGE_VIEW, {});
     this.pageViewId = interaction.id;
     this.appendInteraction(interaction);
@@ -150,6 +162,26 @@ export class PageActions {
    */
   public flush(): PageActions {
     this.publishInteractions();
+    return this;
+  }
+
+  /**
+   * Register a listener that handles page visibility changes. It is used to calculate page visit duration and
+   * to automatically flush page actions when page is closed.
+   * @returns Current PageActions service
+   */
+  public registerVisibilityListener(): PageActions {
+    addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "visible") {
+        console.log("page is visible");
+        this.pageVisible();
+      }
+      if (document.visibilityState === "hidden") {
+        console.log("page is hidden");
+        this.pageHidden();
+        this.flush();
+      }
+    });
     return this;
   }
 
