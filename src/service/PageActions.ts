@@ -28,6 +28,7 @@ export class PageActions {
   private _pageUrl: string | undefined = undefined;
   private _referrer: string | undefined = undefined;
   private _visibilityChanges: VisibilityChange[] = [];
+  private _listenerAbort: AbortController | undefined = undefined;
 
   private _debounceTimeMs = 2000;
   private interactionStream: Subject<Interaction> = new Subject<Interaction>();
@@ -110,6 +111,19 @@ export class PageActions {
   }
 
   /**
+   * Signals that page view ended. Stops page view duration timer and flushes all interactions to the collector.
+   * @returns Current PageActions service for chaining method calls
+   */
+  public endPageView(): PageActions {
+    if (!this.pageViewId) throw new Error(PAGEVIEW_NOT_ACTIVE);
+    this.pageHidden();
+    this.flush();
+    this.pageViewId = undefined;
+    this.interactions = [];
+    return this;
+  }
+
+  /**
    * Reports an action with given type
    * @param type An identifier for the action
    * @param options Optional object with action's options
@@ -171,17 +185,36 @@ export class PageActions {
    * @returns Current PageActions service
    */
   public registerVisibilityListener(): PageActions {
-    addEventListener("visibilitychange", () => {
-      if (document.visibilityState === "visible") {
-        console.log("page is visible");
-        this.pageVisible();
-      }
-      if (document.visibilityState === "hidden") {
-        console.log("page is hidden");
-        this.pageHidden();
-        this.flush();
-      }
-    });
+    const abortController = new AbortController();
+    this._listenerAbort = abortController;
+    addEventListener(
+      "visibilitychange",
+      () => {
+        if (document.visibilityState === "visible") {
+          console.log("page is visible");
+          this.pageVisible();
+        }
+        if (document.visibilityState === "hidden") {
+          console.log("page is hidden");
+          this.pageHidden();
+          this.flush();
+        }
+      },
+      {
+        signal: abortController.signal,
+      },
+    );
+    return this;
+  }
+
+  /**
+   * Unregister an existing visibility listener.
+   * @returns Current PageActions service
+   */
+  public unregisterVisibilityListener(): PageActions {
+    if (this._listenerAbort) {
+      this._listenerAbort.abort();
+    }
     return this;
   }
 
@@ -298,3 +331,4 @@ const REQUIRE_GROUP_MESSAGE = "Group name cannot be empty";
 const REQUIRE_ACCOUNT_ID_MESSAGE = "Account id cannot be empty";
 const PAGEVIEW_REPEATED_MESSAGE =
   "Function pageView() can be called at most once with given PageActions object";
+const PAGEVIEW_NOT_ACTIVE = "There is no active PageView";

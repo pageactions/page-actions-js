@@ -131,3 +131,15 @@ Another way to do this is by using a `flush` option when reporting an action.
 ```ts
 pageActions.action("focus", { flush: true });
 ```
+
+### End page view
+
+In some cases, a page visit doesn't end with navigation to other documents or closing of the browser tab. For example, the single-page application (SPA) uses a router to navigate to the other view without reloading a page.
+
+In such situations, you may need to signal that some view is no longer displayed and the page-duration timer should be stopped.
+
+You can call the `endPageView()` function to do this. It also sends all existing actions to the collector if they haven't been published yet.
+
+```ts
+pageActions.endPageView();
+```
