@@ -96,9 +96,29 @@ pageActions.firstAction("firstname_changed");
 
 This action will be reported at most one time. Every further call with the same action type will be ignored during page visit (same PageActions instance).
 
+### Page visit duration
+
+Page Action can calculate the total time the user spent on a page. However, to calculate this time correctly, we need to know when a user switches browser tabs or closes the page.
+
+You can register a default visibility change handler that uses [visibilitychange](https://developer.mozilla.org/en-US/docs/Web/API/Document/visibilitychange_event) event listener:
+
+```ts
+pageActions.pageView();
+pageActions.registerVisibilityListener();
+```
+
+The other method is to manually call functions when the page becomes hidden or visible. Remember that a `pageView()` function registers a `page visible` event by default.
+
+```ts
+pageActions.pageVisible();
+pageActions.pageHidden();
+```
+
+The extra benefit of the default handler is that it automatically flushes all events when the page is closed.
+
 ### Flushing actions
 
-By default, sending actions to the collector is delayed so analytics doesn't impact page performance. Sometimes you may need to send events immediately. For example, when clicking on the button performs navigation to a different page. In such situations a `flush()` method can be used to publish events before current page is closed.
+By default, sending actions to the collector is delayed so analytics doesn't impact page performance. Sometimes you may need to send events immediately. For example, when a user clicks on the button that performs navigation to a different page. In such a situation, a `flush()` method can be used to publish events before the current page is closed.
 
 Example:
 
@@ -110,4 +130,16 @@ Another way to do this is by using a `flush` option when reporting an action.
 
 ```ts
 pageActions.action("focus", { flush: true });
+```
+
+### End page view
+
+In some cases, a page visit doesn't end with navigation to other documents or closing of the browser tab. For example, the single-page application (SPA) uses a router to navigate to the other view without reloading a page.
+
+In such situations, you may need to signal that some view is no longer displayed and the page-duration timer should be stopped.
+
+You can call the `endPageView()` function to do this. It also sends all existing actions to the collector if they haven't been published yet.
+
+```ts
+pageActions.endPageView();
 ```

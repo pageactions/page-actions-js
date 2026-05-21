@@ -688,6 +688,111 @@ describe("PageActions service", () => {
     });
   });
 
+  describe("endPageView()", () => {
+    test("should flush all interactions", () => {
+      // given
+      const pageActions = new PageActions("site.com")
+        .collector(COLLECTOR)
+        .accountId(ACCOUNT_ID)
+        .pageView();
+      vi.runAllTimers();
+
+      // when
+      pageActions.action("focus");
+      pageActions.endPageView();
+
+      // then
+      expect(fetch).toHaveBeenCalledTimes(2);
+      expect(lastFetchRequestBody()).toMatchObject({
+        site: "site.com",
+        interactions: [{ type: "pv" }, { type: "focus" }],
+      });
+    });
+
+    test("should send the out visibility event", () => {
+      // given
+      const pageActions = new PageActions("site.com")
+        .collector(COLLECTOR)
+        .accountId(ACCOUNT_ID)
+        .pageView();
+      vi.runAllTimers();
+
+      // when
+      pageActions.endPageView();
+
+      // then
+      expect(fetch).toHaveBeenCalledTimes(2);
+      expect(lastFetchRequestBody()).toMatchObject({
+        interactions: [{ type: "pv" }],
+        visibility: [
+          {
+            type: "in",
+          },
+          {
+            type: "out",
+          },
+        ],
+      });
+    });
+
+    test("should clear interactions list", () => {
+      // given
+      const pageActions = new PageActions("site.com")
+        .collector(COLLECTOR)
+        .accountId(ACCOUNT_ID)
+        .pageView();
+      vi.runAllTimers();
+
+      // when
+      pageActions.endPageView();
+
+      // then
+      expect(pageActions.interactions.length).toBe(0);
+    });
+
+    test("should throw error when trying to report action after page view ended", () => {
+      // given
+      const pageActions = new PageActions("site.com")
+        .collector(COLLECTOR)
+        .accountId(ACCOUNT_ID)
+        .pageView();
+      vi.runAllTimers();
+
+      // and
+      pageActions.endPageView();
+
+      // expect
+      expect(() => pageActions.action("submit")).toThrow(
+        /PageActions\.pageView\(\) should always be called before recording any action/,
+      );
+    });
+
+    test("should throw error when trying to end page view twice", () => {
+      // given
+      const pageActions = new PageActions("site.com")
+        .collector(COLLECTOR)
+        .accountId(ACCOUNT_ID)
+        .pageView();
+      vi.runAllTimers();
+
+      // and
+      pageActions.endPageView();
+
+      // expect
+      expect(() => pageActions.endPageView()).toThrow(/There is no active PageView/);
+      expect(fetch).toHaveBeenCalledTimes(2);
+    });
+
+    test("should throw error when trying to end before pageView()", () => {
+      // given
+      const pageActions = new PageActions("site.com").collector(COLLECTOR).accountId(ACCOUNT_ID);
+
+      // expect
+      expect(() => pageActions.endPageView()).toThrow(/There is no active PageView/);
+      expect(fetch).toHaveBeenCalledTimes(0);
+    });
+  });
+
   function lastFetchRequestBody(): any {
     const lastRequest = lastFetchRequestOptions();
     if (!lastRequest?.body) {

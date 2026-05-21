@@ -1,5 +1,6 @@
 import { PAGE_VIEW, type Interaction, type ViewInteractions } from "../type/Interaction.type.js";
 import { debounceTime, Subject } from "rxjs";
+import { VISIBLITY_IN, VISIBLITY_OUT, type VisibilityChange } from "../type/visibility.type.js";
 
 /** Object for optional action's options */
 export interface ActionOptions {
@@ -26,6 +27,8 @@ export class PageActions {
   private _groupName: string = "default";
   private _pageUrl: string | undefined = undefined;
   private _referrer: string | undefined = undefined;
+  private _visibilityChanges: VisibilityChange[] = [];
+  private _listenerAbort: AbortController | undefined = undefined;
 
   private _debounceTimeMs = 2000;
   private interactionStream: Subject<Interaction> = new Subject<Interaction>();
@@ -75,6 +78,12 @@ export class PageActions {
     return this;
   }
 
+  /**
+   * Configure your group ID for reported actions. Must be configured before reporting page view or any action.
+   * It should be used if you want to measure different things or single page or you have same form on different pages. You can filter page views by group ID in the dashboard.
+   * @param value A Group ID for reported actions, 'default' if not provided
+   * @returns Current PageActions service for chaining method calls
+   */
   public group(value: string): PageActions {
     if (!value) throw new Error(REQUIRE_GROUP_MESSAGE);
     if (this.interactions.length > 0) throw new Error(GROUP_AFTER_PAGEVIEW_MESSAGE);
@@ -82,16 +91,36 @@ export class PageActions {
     return this;
   }
 
+  /**
+   * Reports page view event. Must be called only once before any page action is reported.
+   * @returns Current PageActions service for chaining method calls
+   */
   public pageView(): PageActions {
     if (!this._collectorUrl) throw new Error(COLLECTOR_MISSING_MESSAGE);
     if (!this._accountId) throw new Error(ACCOUNT_ID_MISSING_MESSAGE);
     if (this.interactions.length > 0) throw new Error(PAGEVIEW_REPEATED_MESSAGE);
     this._pageUrl = document.location.href;
     this._referrer = document.referrer;
+    this._visibilityChanges = [];
+    if (document.visibilityState === "visible") this.pageVisible();
     const interaction = this.createInteraction(PAGE_VIEW, {});
     this.pageViewId = interaction.id;
     this.appendInteraction(interaction);
     if (this._verbose) console.log("Registered page view", interaction);
+    return this;
+  }
+
+  /**
+   * Signals that page view ended. Stops page view duration timer and flushes all interactions to the collector.
+   * @returns Current PageActions service for chaining method calls
+   */
+  public endPageView(): PageActions {
+    if (!this.pageViewId) throw new Error(PAGEVIEW_NOT_ACTIVE);
+    this.pageHidden();
+    this.flush();
+    this.pageViewId = undefined;
+    this.interactions = [];
+    if (this._verbose) console.log("Page view ended");
     return this;
   }
 
@@ -151,7 +180,70 @@ export class PageActions {
     return this;
   }
 
-  public containsInteraction(interactionType: string): boolean {
+  /**
+   * Register a listener that handles page visibility changes. It is used to calculate page visit duration and
+   * to automatically flush page actions when page is closed.
+   * @returns Current PageActions service
+   */
+  public registerVisibilityListener(): PageActions {
+    const abortController = new AbortController();
+    this._listenerAbort = abortController;
+    addEventListener(
+      "visibilitychange",
+      () => {
+        if (document.visibilityState === "visible") {
+          this.pageVisible();
+        }
+        if (document.visibilityState === "hidden") {
+          this.pageHidden();
+          this.flush();
+        }
+      },
+      {
+        signal: abortController.signal,
+      },
+    );
+    return this;
+  }
+
+  /**
+   * Unregister an existing visibility listener.
+   * @returns Current PageActions service
+   */
+  public unregisterVisibilityListener(): PageActions {
+    if (this._listenerAbort) {
+      this._listenerAbort.abort();
+    }
+    return this;
+  }
+
+  /**
+   * Report page enters visible state
+   * @returns Current PageActions service
+   */
+  public pageVisible(): PageActions {
+    this._visibilityChanges.push({
+      type: VISIBLITY_IN,
+      at: new Date().toISOString(),
+    });
+    return this;
+  }
+
+  /**
+   * Report page enters hidden state
+   * @returns Current PageActions service
+   */
+  public pageHidden(): PageActions {
+    this._visibilityChanges.push({
+      type: VISIBLITY_OUT,
+      at: new Date().toISOString(),
+    });
+    return this;
+  }
+
+  // Private
+
+  private containsInteraction(interactionType: string): boolean {
     return this.interactions.findIndex((it) => it.type === interactionType) >= 0;
   }
 
@@ -201,6 +293,7 @@ export class PageActions {
       viewStartedAt: new Date(),
       referrer: this._referrer,
       pageUrl: this._pageUrl,
+      visibility: this._visibilityChanges,
     } as ViewInteractions;
   }
 
@@ -237,3 +330,4 @@ const REQUIRE_GROUP_MESSAGE = "Group name cannot be empty";
 const REQUIRE_ACCOUNT_ID_MESSAGE = "Account id cannot be empty";
 const PAGEVIEW_REPEATED_MESSAGE =
   "Function pageView() can be called at most once with given PageActions object";
+const PAGEVIEW_NOT_ACTIVE = "There is no active PageView";
