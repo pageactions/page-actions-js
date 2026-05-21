@@ -120,6 +120,7 @@ export class PageActions {
     this.flush();
     this.pageViewId = undefined;
     this.interactions = [];
+    if (this._verbose) console.log("Page view ended");
     return this;
   }
 
@@ -191,11 +192,9 @@ export class PageActions {
       "visibilitychange",
       () => {
         if (document.visibilityState === "visible") {
-          console.log("page is visible");
           this.pageVisible();
         }
         if (document.visibilityState === "hidden") {
-          console.log("page is hidden");
           this.pageHidden();
           this.flush();
         }
