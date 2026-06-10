@@ -27,6 +27,7 @@
     }
   },
   "scripts": {
+    "prebuild": "npm run fmt && npm run test",
     "build": "tsc",
     "build:watch": "tsc --watch",
     "build:link": "npm run build && npm link",
