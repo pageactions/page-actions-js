@@ -143,3 +143,12 @@ You can call the `endPageView()` function to do this. It also sends all existing
 ```ts
 pageActions.endPageView();
 ```
+
+### Ignore page actions from development computer
+
+After you install Page Actions on your website, you may want to ignore page views and actions from your local machine. While testing you can generate a lot of page views that should not be counted as website traffic that you want to observe.
+
+If you set a `page_actions_ignore` local storage key with a value of `true`, then all page views and page actions will be ignored and not sent to the collector.
+
+You may also set `page_actions_verbose` with value of `true` to force verbose mode and see page actions in the browser's console.
+
