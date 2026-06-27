@@ -43,6 +43,9 @@ export class PageActions {
     }
     this._siteId = siteId;
     this.registerInteractionsListener();
+    if (window.localStorage.getItem("page_actions_verbose") == "true") {
+      this._verbose = true;
+    }
     if (this._verbose) console.log("PageActions service created with siteId = " + siteId);
   }
 
@@ -62,7 +65,9 @@ export class PageActions {
    * @returns Current PageActions service for chaining method calls
    */
   public verbose(value: boolean): PageActions {
-    this._verbose = value;
+    if (window.localStorage.getItem("page_actions_verbose") != "true") {
+      this._verbose = value;
+    }
     return this;
   }
 
@@ -280,7 +285,9 @@ export class PageActions {
   }
 
   private publishInteractions(): void {
-    this.sendInteraction(this.createViewInteractions());
+    if (window.localStorage.getItem("page_actions_ignore") !== "true") {
+      this.sendInteraction(this.createViewInteractions());
+    }
   }
 
   private createViewInteractions(): ViewInteractions {

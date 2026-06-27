@@ -96,6 +96,43 @@ describe("PageActions service", () => {
       });
     });
 
+    test("should not send interations to the collector when ignore page actions flag is true", () => {
+      // given
+      window.localStorage.setItem("page_actions_ignore", "true");
+
+      // and
+      const pageActions = new PageActions("site.com").collector(COLLECTOR).accountId("acc1");
+
+      // when
+      pageActions.pageView();
+      vi.runAllTimers();
+
+      // then
+      expect(fetch).toHaveBeenCalledTimes(0);
+    });
+
+    test("should send interations to the collector when ignore page actions flag is false", () => {
+      // given
+      window.localStorage.setItem("page_actions_ignore", "false");
+
+      // and
+      const pageActions = new PageActions("site.com").collector(COLLECTOR).accountId("acc1");
+
+      // when
+      pageActions.pageView();
+      vi.runAllTimers();
+
+      // then
+      expect(fetch).toHaveBeenCalledTimes(1);
+      expect(lastFetchRequestUrl()).toBe(COLLECTOR + "/interactions");
+      expect(lastFetchRequestBody()).toMatchObject({
+        accountId: "acc1",
+        site: "site.com",
+        group: "default",
+        interactions: [{ type: "pv" }],
+      });
+    });
+
     test("should generate random uuid as id for event and set it as pageViewId", () => {
       // given
       const pageActions = new PageActions("site.com").collector(COLLECTOR).accountId(ACCOUNT_ID);
