@@ -151,4 +151,3 @@ After you install Page Actions on your website, you may want to ignore page view
 If you set a `page_actions_ignore` local storage key with a value of `true`, then all page views and page actions will be ignored and not sent to the collector.
 
 You may also set `page_actions_verbose` with value of `true` to force verbose mode and see page actions in the browser's console.
-
